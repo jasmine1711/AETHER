@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const orderItemSchema = new mongoose.Schema({
-  product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
   name: String,
   price: Number,
   qty: Number,
@@ -11,7 +11,7 @@ const orderItemSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     items: [orderItemSchema],
     shipping: {
       name: String,
@@ -21,8 +21,8 @@ const orderSchema = new mongoose.Schema(
       pincode: String,
       state: String,
     },
-    paymentProvider: { type: String, enum: ['razorpay', 'stripe'], default: 'razorpay' },
-    paymentStatus: { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+    paymentProvider: { type: String, enum: ["razorpay", "stripe"], default: "razorpay" },
+    paymentStatus: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
     paymentId: String,
     subtotal: Number,
     shippingFee: { type: Number, default: 0 },
@@ -31,4 +31,4 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = mongoose.model("Order", orderSchema);

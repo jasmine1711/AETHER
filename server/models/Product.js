@@ -1,32 +1,59 @@
-const mongoose = require('mongoose');
-
-const reviewSchema = new mongoose.Schema(
-  {
-    name: String,
-    rating: { type: Number, min: 1, max: 5, required: true },
-    comment: String,
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  },
-  { timestamps: true }
-);
+// backend/models/Product.js
+const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
-    brand: { type: String, default: 'ÆTHER' },
-    category: { type: String, enum: ['Clothing', 'Footwear', 'Shoes'], required: true },
-    price: { type: Number, required: true },
-    stock: { type: Number, default: 10 },
-    images: [{ type: String }],
-    sizes: [{ type: String }],           // e.g. ["S","M","L","UK7","UK8"]
-    isThrifted: { type: Boolean, default: true },
-    condition: { type: String, default: 'Good' }, // Excellent/Good/Fair
-    description: { type: String, default: '' },
-    rating: { type: Number, default: 0 },
-    numReviews: { type: Number, default: 0 },
-    reviews: [reviewSchema],
+    name: {
+      type: String,
+      required: [true, "Product name is required"],
+      trim: true,
+    },
+    category: {
+      type: String,
+      required: [true, "Category is required"],
+      enum: [
+        "leather jacket",
+        "y2k era tops",
+        "corset top",
+        "denim jeans",
+        "handbags",
+        "faux leather jacket",
+      ],
+    },
+    brand: {
+      type: String,
+      default: "Aether",
+    },
+    price: {
+      type: Number,
+      required: [true, "Price is required"],
+      min: [0, "Price must be a positive number"],
+    },
+    condition: {
+      type: String,
+      enum: ["New", "Used"],
+      default: "New",
+    },
+    images: {
+      type: [String],
+      required: [true, "At least one image is required"],
+      validate: {
+        validator: function (arr) {
+          return arr.length > 0;
+        },
+        message: "At least one image URL must be provided",
+      },
+    },
+    thumbnail: {
+      type: String,
+      required: [true, "Thumbnail image is required"],
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model('Product', productSchema);
+const Product = mongoose.model("Product", productSchema);
+
+module.exports = Product;

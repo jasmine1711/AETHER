@@ -1,132 +1,97 @@
-const express = require('express');
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
-const { protect } = require('../middleware/authMiddleware');
+const express = require("express");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
+const { protect } = require("../middleware/authMiddleware");
+const Order = require("../models/Order");
 
 const router = express.Router();
 
-// Initialize Razorpay instance
-const rzp = new Razorpay({
+
+// Initialize Razorpay with ENV keys
+const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// Test route
-router.get('/test', (req, res) => {
-  res.json({ message: 'Payments routes are working!' });
+/* ------------------ Test Route ------------------ */
+router.get("/test", (req, res) => {
+  res.json({ message: "🚀 AETHER Payments API is live" });
 });
 
-// Create order (amount in paise)
-router.post('/razorpay/order', protect, async (req, res) => {
+/* ------------------ Create Razorpay Order ------------------ */
+router.post("/razorpay/order", protect, async (req, res) => {
   try {
-    const { amount, currency = 'INR' } = req.body;
-    
-    // Validation
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ error: 'Valid amount is required' });
-    }
+    const { items, shipping, subtotal, shippingFee, total } = req.body;
 
-    const order = await rzp.orders.create({
-      amount: parseInt(amount),
-      currency: currency,
-      receipt: 'rcpt_' + Date.now(),
-      notes: {
-        userId: req.user.id, // Assuming your protect middleware adds user to req
-        orderDetails: JSON.stringify(req.body.orderDetails || {})
-      }
+    // Create Razorpay order
+    const options = {
+      amount: total * 100, // paise
+      currency: "INR",
+      receipt: `aether_${Date.now()}`,
+      notes: { userId: req.user._id.toString() },
+    };
+
+    const rzpOrder = await razorpay.orders.create(options);
+
+    // Save order in MongoDB
+    const newOrder = await Order.create({
+      user: req.user._id,
+      items,
+      shipping,
+      subtotal,
+      shippingFee,
+      total,
+      paymentProvider: "razorpay",
+      paymentStatus: "pending",
     });
-    
-    res.json({
-      success: true,
-      order: order
-    });
-  } catch (error) {
-    console.error('Razorpay order creation error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to create order',
-      message: error.error?.description || error.message
-    });
+
+    res.json({ success: true, razorpayOrder: rzpOrder, dbOrder: newOrder });
+  } catch (err) {
+    console.error("Order creation error:", err);
+    res.status(500).json({ success: false, message: "Payment order creation failed" });
   }
 });
 
-// Verify signature (after payment)
-router.post('/razorpay/verify', protect, async (req, res) => {
+/* ------------------ Verify Payment ------------------ */
+router.post("/razorpay/verify", protect, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    
-    // Validation
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({ error: 'Missing payment verification data' });
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Signature mismatch" });
     }
 
-    const sign = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(razorpay_order_id + '|' + razorpay_payment_id)
-      .digest('hex');
-
-    if (sign === razorpay_signature) {
-      return res.json({ 
-        success: true, 
-        verified: true, 
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id
-      });
+    // Update DB order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
     }
-    
-    res.status(400).json({ 
-      success: false, 
-      verified: false,
-      error: 'Payment verification failed'
-    });
-  } catch (error) {
-    console.error('Razorpay verification error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Payment verification error',
-      message: error.message
-    });
+
+    order.paymentStatus = "paid";
+    order.paymentId = razorpay_payment_id;
+    await order.save();
+
+    res.json({ success: true, message: "Payment verified", order });
+  } catch (err) {
+    console.error("Payment verify error:", err);
+    res.status(500).json({ success: false, message: "Payment verification failed" });
   }
 });
 
-// Get payment details by ID
-router.get('/razorpay/payment/:paymentId', protect, async (req, res) => {
+/* ------------------ Get User Orders ------------------ */
+router.get("/my-orders", protect, async (req, res) => {
   try {
-    const { paymentId } = req.params;
-    
-    if (!paymentId) {
-      return res.status(400).json({ error: 'Payment ID is required' });
-    }
-
-    const payment = await rzp.payments.fetch(paymentId);
-    res.json({ success: true, payment });
-  } catch (error) {
-    console.error('Fetch payment error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to fetch payment details',
-      message: error.error?.description || error.message
-    });
-  }
-});
-
-// Get order details by ID
-router.get('/razorpay/order/:orderId', protect, async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    
-    if (!orderId) {
-      return res.status(400).json({ error: 'Order ID is required' });
-    }
-
-    const order = await rzp.orders.fetch(orderId);
-    res.json({ success: true, order });
-  } catch (error) {
-    console.error('Fetch order error:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to fetch order details',
-      message: error.error?.description || error.message
-    });
+    const orders = await Order.find({ user: req.user._id }).populate("items.product");
+    res.json(orders);
+  } catch (err) {
+    console.error("Fetch orders error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
   }
 });
 
