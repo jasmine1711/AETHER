@@ -35,17 +35,16 @@ const productSchema = new mongoose.Schema(
       default: "New",
     },
     images: {
-      type: [String],
-      required: [true, "At least one image is required"],
+      type: [String], // array of image URLs or paths
       validate: {
         validator: function (arr) {
-          return arr.length > 0;
+          return Array.isArray(arr) && arr.length > 0;
         },
         message: "At least one image URL must be provided",
       },
     },
     thumbnail: {
-      type: String,
+      type: String, // main image for display (featured / cards)
       required: [true, "Thumbnail image is required"],
     },
   },

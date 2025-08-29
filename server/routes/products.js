@@ -12,7 +12,7 @@ router.get("/", async (req, res) => {
   try {
     const products = await Product.find()
       .sort({ createdAt: -1 })
-      .populate("reviews.user", "name email"); // populate reviewer details
+      .populate("reviews.user", "name email"); 
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
@@ -44,6 +44,7 @@ router.post(
     body("name", "Name is required").notEmpty(),
     body("price", "Price must be a number").isFloat({ gt: 0 }),
     body("category", "Category is required").notEmpty(),
+    body("thumbnail", "Thumbnail image is required").notEmpty(), // ✅ NEW VALIDATION
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -66,6 +67,7 @@ router.put(
   [
     body("price").optional().isFloat({ gt: 0 }).withMessage("Price must be greater than 0"),
     body("name").optional().notEmpty().withMessage("Name cannot be empty"),
+    body("thumbnail").optional().notEmpty().withMessage("Thumbnail cannot be empty"), // ✅ allow updating thumbnail
   ],
   async (req, res) => {
     const errors = validationResult(req);
