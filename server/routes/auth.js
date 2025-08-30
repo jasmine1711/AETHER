@@ -5,7 +5,6 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-require("dotenv").config();
 
 // ======================= MIDDLEWARE =======================
 const protect = async (req, res, next) => {
@@ -23,8 +22,8 @@ const protect = async (req, res, next) => {
 
     req.user = user;
     next();
-  } catch (error) {
-    console.error("Auth middleware error:", error);
+  } catch (err) {
+    console.error("Auth middleware error:", err);
     res.status(401).json({ message: "Invalid or expired token" });
   }
 };
@@ -39,7 +38,7 @@ const sendResetEmail = async (user, resetUrl) => {
     auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
   });
 
-  const mailOptions = {
+  await transporter.sendMail({
     to: user.email,
     from: process.env.EMAIL_USER,
     subject: "🔑 Password Reset - AETHER",
@@ -48,18 +47,17 @@ const sendResetEmail = async (user, resetUrl) => {
       <p>Click below to continue:</p>
       <a href="${resetUrl}" style="color:#fff;background:#6C63FF;padding:10px 20px;text-decoration:none;border-radius:5px;">Reset Password</a>
       <p>This link will expire in <b>1 hour</b>.</p>
-      <p>If you didn’t request this, please ignore this email.</p>
       <br/><p>— Team AETHER</p>
     `,
-  };
-
-  await transporter.sendMail(mailOptions);
+  });
 };
 
 // ======================= ROUTES =======================
 
-// Test route
-router.get("/test", (req, res) => res.json({ message: "🔐 AETHER Auth routes working!" }));
+// Test
+router.get("/test", (req, res) =>
+  res.json({ message: "🔐 AETHER Auth routes working!" })
+);
 
 // Get logged in user
 router.get("/user", protect, (req, res) => res.json({ user: req.user }));
@@ -70,14 +68,14 @@ router.post("/signup", async (req, res) => {
     const { name, email, username, password } = req.body;
 
     if (!email || !username || !password)
-      return res.status(400).json({ message: "Email, username, and password are required" });
+      return res.status(400).json({ message: "Email, username, and password required" });
 
     if (password.length < 6)
       return res.status(400).json({ message: "Password must be at least 6 characters" });
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-    if (existingUser) {
-      const msg = existingUser.email === email ? "Email already exists" : "Username already taken";
+    const existing = await User.findOne({ $or: [{ email }, { username }] });
+    if (existing) {
+      const msg = existing.email === email ? "Email already exists" : "Username already taken";
       return res.status(400).json({ message: msg });
     }
 
@@ -85,11 +83,11 @@ router.post("/signup", async (req, res) => {
     await user.save();
 
     res.status(201).json({
-      message: " User created successfully, please log in",
+      message: "✅ User created successfully, please log in",
       user: { id: user._id, name: user.name, email: user.email, username: user.username },
     });
-  } catch (error) {
-    console.error("Signup error:", error);
+  } catch (err) {
+    console.error("Signup error:", err);
     res.status(500).json({ message: "Server error during signup" });
   }
 });
@@ -112,8 +110,8 @@ router.post("/login", async (req, res) => {
       token,
       user: { id: user._id, name: user.name, email: user.email, username: user.username },
     });
-  } catch (error) {
-    console.error("Login error:", error);
+  } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: "Server error during login" });
   }
 });
@@ -126,32 +124,26 @@ router.post("/forgot-password", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      // Don't reveal if email exists
-      return res.status(200).json({
-        message: "If registered, you will receive a password reset link",
-      });
+      return res.status(200).json({ message: "If registered, you will receive a reset link" });
     }
 
-    // Generate token
     const token = crypto.randomBytes(20).toString("hex");
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    user.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
 
-    // TEMP: log token for testing
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${token}`;
-    console.log("Password reset link:", resetUrl);
+    console.log("Reset URL:", resetUrl);
 
-    // Send email (optional)
-    // await transporter.sendMail({...});
+    // Uncomment in production:
+    // await sendResetEmail(user, resetUrl);
 
-    res.status(200).json({ message: "📩 Recovery email sent successfully." });
-  } catch (error) {
-    console.error("Forgot password error:", error);
-    res.status(500).json({ message: "Error sending password reset email." });
+    res.status(200).json({ message: "📩 Recovery email sent successfully" });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ message: "Error sending reset email" });
   }
 });
-
 
 // Reset password
 router.post("/reset-password/:token", async (req, res) => {
@@ -159,43 +151,39 @@ router.post("/reset-password/:token", async (req, res) => {
     const { token } = req.params;
     const { password } = req.body;
 
-    if (!password || password.length < 6) {
+    if (!password || password.length < 6)
       return res.status(400).json({ message: "Password must be at least 6 characters" });
-    }
 
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() },
     });
+    if (!user) return res.status(400).json({ message: "Token invalid or expired" });
 
-    if (!user) return res.status(400).json({ message: "Token is invalid or expired" });
-
-    user.password = password; // hashed by pre-save middleware
+    user.password = password; // will be hashed by pre-save
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
-
     await user.save();
 
-    res.json({ message: " Password has been reset successfully" });
-  } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(500).json({ message: "Server error during password reset" });
+    res.json({ message: "✅ Password reset successful" });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ message: "Server error during reset" });
   }
 });
-
 
 // Logout
 router.post("/logout", (req, res) => res.json({ message: "👋 Logout successful" }));
 
-// TEMP: List all users
-router.get("/all-users", async (req, res) => {
+// Admin-only all-users
+router.get("/all-users", protect, async (req, res) => {
   try {
+    if (!req.user.isAdmin) return res.status(403).json({ message: "Forbidden" });
     const users = await User.find({});
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Error fetching users" });
   }
 });
-
 
 module.exports = router;
