@@ -1,4 +1,3 @@
-// backend/seeder.js
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const Product = require("./models/Product");
@@ -7,43 +6,54 @@ const connectDB = require("./config/db");
 dotenv.config();
 connectDB();
 
-// ✅ Allowed categories (must match schema exactly)
+// ✅ Always use slug format for categories
 const allowedCategories = [
-  "Leather Jacket",
-  "Y2K Era Tops",
-  "Corset Top",
-  "Denim Jeans",
-  "Handbags",
-  "Faux Leather Jacket",
+  "leather-jackets",
+  "y2k-tops",
+  "corset-tops",
+  "denim-jeans",
+  "handbags",
+  "faux-leather-jackets",
 ];
 
-// ✅ Normalize product (enforces rules & auto-thumbnail)
+// ✅ Normalize product (slug-safe + images + auto-thumbnail)
 function normalizeProduct(product) {
-  if (!product.name || !product.price || !product.category) {
-    throw new Error(`❌ Missing required field in product: ${product.name}`);
-  }
-  if (!allowedCategories.includes(product.category)) {
-    throw new Error(`❌ Invalid category for product: ${product.name}`);
+  if (!product || typeof product !== "object") {
+    throw new Error("❌ Invalid product object");
   }
 
-  if (!product.images || !Array.isArray(product.images) || product.images.length === 0) {
-    throw new Error(`❌ Images missing for product: ${product.name}`);
+  const { name, price, category, images = [], thumbnail } = product;
+
+  if (!name) throw new Error("❌ Missing required field: name");
+  if (price == null) throw new Error(`❌ Missing required field: price for ${name}`);
+  if (!category) throw new Error(`❌ Missing required field: category for ${name}`);
+  if (!Array.isArray(images) || images.length === 0) {
+    throw new Error(`❌ Images missing for product: ${name}`);
   }
+
+  let normalizedCategory = category;
+  if (!allowedCategories.includes(normalizedCategory)) {
+    console.warn(`⚠️ Invalid category "${category}", defaulting to "handbags"`);
+    normalizedCategory = "handbags";
+  }
+
+  const normalizedImages = images.map((img) =>
+    img.startsWith("/") ? img : `/${img}`
+  );
 
   return {
     ...product,
-    images: product.images.map((img) =>
-      img.startsWith("/") ? img : `/${img}`
-    ),
-    thumbnail: product.thumbnail || product.images[0], // ✅ Auto fallback
+    category: normalizedCategory,
+    images: normalizedImages,
+    thumbnail: thumbnail || normalizedImages[0],
   };
 }
 
-// ✅ Product data
+// ✅ Product data with category slugs
 const products = [
   normalizeProduct({
     name: "Belted Faux Leather Long Coat",
-    category: "Faux Leather Jacket",
+    category: "faux-leather-jackets",
     brand: "Luxury Editions",
     price: 3499,
     condition: "New",
@@ -55,7 +65,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Black Polka Net Top",
-    category: "Y2K Era Tops",
+    category: "y2k-tops",
     brand: "Trendy Wear",
     price: 999,
     condition: "New",
@@ -67,7 +77,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Blue Jean Corset",
-    category: "Corset Top",
+    category: "corset-tops",
     brand: "Denim Luxe",
     price: 1499,
     condition: "New",
@@ -78,7 +88,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Burgundy Halter Neck Corset Top",
-    category: "Corset Top",
+    category: "corset-tops",
     brand: "Glam Studio",
     price: 1599,
     condition: "New",
@@ -87,11 +97,11 @@ const products = [
       "/images/products/Burgundy Halter Neck Corset Top/2.jpeg",
       "/images/products/Burgundy Halter Neck Corset Top/3.jpeg",
     ],
-    thumbnail: "/images/products/Burgundy Halter Neck Corset Top/2.jpeg", // ✅ Custom
+    thumbnail: "/images/products/Burgundy Halter Neck Corset Top/2.jpeg",
   }),
   normalizeProduct({
     name: "Cat Lover Corset Top",
-    category: "Corset Top",
+    category: "corset-tops",
     brand: "Street Fashion",
     price: 1399,
     condition: "New",
@@ -100,11 +110,11 @@ const products = [
       "/images/products/Cat Lover Corset Top/2.jpeg",
       "/images/products/Cat Lover Corset Top/3.jpeg",
     ],
-    thumbnail: "/images/products/Cat Lover Corset Top/3.jpeg", // ✅ Custom
+    thumbnail: "/images/products/Cat Lover Corset Top/3.jpeg",
   }),
   normalizeProduct({
     name: "Dark Blue Classic Denim",
-    category: "Denim Jeans",
+    category: "denim-jeans",
     brand: "Denim Luxe",
     price: 1999,
     condition: "New",
@@ -116,7 +126,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Embroidery Vintage Denim",
-    category: "Denim Jeans",
+    category: "denim-jeans",
     brand: "Retro Threads",
     price: 2199,
     condition: "New",
@@ -128,7 +138,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Faux Leather Jacket",
-    category: "Faux Leather Jacket",
+    category: "faux-leather-jackets",
     brand: "Urban Edge",
     price: 2799,
     condition: "New",
@@ -141,7 +151,7 @@ const products = [
   }),
   normalizeProduct({
     name: "French Lantern Sleeves Corset",
-    category: "Corset Top",
+    category: "corset-tops",
     brand: "Romantic Era",
     price: 1699,
     condition: "New",
@@ -152,7 +162,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Gen-Z Touch Denim",
-    category: "Denim Jeans",
+    category: "denim-jeans",
     brand: "Streetwear",
     price: 1899,
     condition: "New",
@@ -163,7 +173,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Heart Shape Bell Bottom",
-    category: "Denim Jeans",
+    category: "denim-jeans",
     brand: "Retro Luxe",
     price: 2099,
     condition: "New",
@@ -175,7 +185,7 @@ const products = [
   }),
   normalizeProduct({
     name: "HeartShape Leather Purse",
-    category: "Handbags",
+    category: "handbags",
     brand: "Luxury Editions",
     price: 2499,
     condition: "New",
@@ -186,7 +196,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Patchwork Faux Leather Jacket",
-    category: "Faux Leather Jacket",
+    category: "faux-leather-jackets",
     brand: "Designer Cuts",
     price: 2999,
     condition: "New",
@@ -198,7 +208,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Puff Full-Sleeves Top",
-    category: "Y2K Era Tops",
+    category: "y2k-tops",
     brand: "Trendy Wear",
     price: 1099,
     condition: "New",
@@ -210,7 +220,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Red Puff Sleeve Open Back Top",
-    category: "Y2K Era Tops",
+    category: "y2k-tops",
     brand: "Trendy Wear",
     price: 1199,
     condition: "New",
@@ -222,7 +232,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Ruffled Blouse with Bow Closure",
-    category: "Y2K Era Tops",
+    category: "y2k-tops",
     brand: "Elegant Chic",
     price: 1299,
     condition: "New",
@@ -234,7 +244,7 @@ const products = [
   }),
   normalizeProduct({
     name: "White Handbag",
-    category: "Handbags",
+    category: "handbags",
     brand: "Luxury Editions",
     price: 2299,
     condition: "New",
@@ -246,7 +256,7 @@ const products = [
   }),
   normalizeProduct({
     name: "White Polka Top",
-    category: "Y2K Era Tops",
+    category: "y2k-tops",
     brand: "Trendy Wear",
     price: 999,
     condition: "New",
@@ -258,7 +268,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Coach Tabby Bag Daisy Print",
-    category: "Handbags",
+    category: "handbags",
     brand: "Coach",
     price: 3999,
     condition: "New",
@@ -268,7 +278,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Messenger Bag",
-    category: "Handbags",
+    category: "handbags",
     brand: "Casual Carry",
     price: 1799,
     condition: "New",
