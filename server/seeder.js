@@ -196,7 +196,7 @@ const products = [
   }),
   normalizeProduct({
     name: "Patchwork Faux Leather Jacket",
-    category: "faux-leather-jackets",
+    category: "leather-jackets",
     brand: "Designer Cuts",
     price: 2999,
     condition: "New",
