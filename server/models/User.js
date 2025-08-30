@@ -11,9 +11,9 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      match: /^\S+@\S+\.\S+$/
+      match: /^\S+@\S+\.\S+$/,
     },
-    password: { type: String, required: true, minlength: 6 },
+    password: { type: String, required: true, minlength: 6, select: true }, // ✅ always selectable
     isAdmin: { type: Boolean, default: false },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Hash password before save
+// 🔑 Hash password before save
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   try {
@@ -33,15 +33,17 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Compare password
+// 🔍 Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Remove password from JSON
+// 🚫 Remove sensitive fields from JSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
+  delete obj.resetPasswordToken;
+  delete obj.resetPasswordExpires;
   return obj;
 };
 
