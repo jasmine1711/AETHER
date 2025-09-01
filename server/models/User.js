@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: /^\S+@\S+\.\S+$/,
     },
-    password: { type: String, required: true, minlength: 6, select: true }, // ✅ always selectable
+    password: { type: String, required: true, minlength: 6, select: false }, // ✅ secure
     isAdmin: { type: Boolean, default: false },
     resetPasswordToken: String,
     resetPasswordExpires: Date,

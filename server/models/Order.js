@@ -1,32 +1,43 @@
 const mongoose = require("mongoose");
 
+// Sub-schema for individual order items
 const orderItemSchema = new mongoose.Schema({
   product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
-  name: String,
-  price: Number,
-  qty: Number,
-  size: String,
-  image: String,
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true },
+  size: { type: String, default: "" },
+  image: { type: String, default: "" },
 });
 
+// Main Order schema
 const orderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    items: [orderItemSchema],
+
+    // Array of ordered items
+    items: { type: [orderItemSchema], required: true, default: [] },
+
+    // Shipping info
     shipping: {
-      name: String,
-      phone: String,
-      address: String,
-      city: String,
-      pincode: String,
-      state: String,
+      name: { type: String, default: "" },
+      email: { type: String, default: "" },
+      phone: { type: String, default: "" },
+      address: { type: String, default: "" },
+      city: { type: String, default: "" },
+      state: { type: String, default: "" },
+      pincode: { type: String, default: "" },
     },
+
+    // Payment info
     paymentProvider: { type: String, enum: ["razorpay", "stripe"], default: "razorpay" },
     paymentStatus: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
-    paymentId: String,
-    subtotal: Number,
+    paymentId: { type: String, default: "" },
+
+    // Pricing
+    subtotal: { type: Number, required: true, default: 0 },
     shippingFee: { type: Number, default: 0 },
-    total: Number,
+    total: { type: Number, required: true, default: 0 },
   },
   { timestamps: true }
 );

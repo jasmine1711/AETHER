@@ -17,7 +17,7 @@ const protect = async (req, res, next) => {
     const token = authHeader.split(" ")[1].trim();
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.id).select("-password");
     if (!user) return res.status(401).json({ message: "User not found" });
 
     req.user = user;
@@ -30,7 +30,7 @@ const protect = async (req, res, next) => {
 
 // ======================= UTILITIES =======================
 const generateToken = (userId) =>
-  jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
 const sendResetEmail = async (user, resetUrl) => {
   const transporter = nodemailer.createTransport({
@@ -54,7 +54,7 @@ const sendResetEmail = async (user, resetUrl) => {
 
 // ======================= ROUTES =======================
 
-// Test
+// Test route
 router.get("/test", (req, res) =>
   res.json({ message: "🔐 AETHER Auth routes working!" })
 );
@@ -62,13 +62,13 @@ router.get("/test", (req, res) =>
 // Get logged in user
 router.get("/user", protect, (req, res) => res.json({ user: req.user }));
 
-// Signup
+// ---------------- SIGNUP ----------------
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, username, password } = req.body;
 
-    if (!email || !username || !password)
-      return res.status(400).json({ message: "Email, username, and password required" });
+    if (!name || !email || !username || !password)
+      return res.status(400).json({ message: "All fields are required" });
 
     if (password.length < 6)
       return res.status(400).json({ message: "Password must be at least 6 characters" });
@@ -82,8 +82,11 @@ router.post("/signup", async (req, res) => {
     const user = new User({ name, email, username, password });
     await user.save();
 
+    const token = generateToken(user._id);
+
     res.status(201).json({
-      message: "✅ User created successfully, please log in",
+      message: "✅ User created successfully",
+      token,
       user: { id: user._id, name: user.name, email: user.email, username: user.username },
     });
   } catch (err) {
@@ -92,13 +95,14 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// Login
+// ---------------- LOGIN ----------------
 router.post("/login", async (req, res) => {
   try {
     const { login, password } = req.body;
-    if (!login || !password) return res.status(400).json({ message: "Login and password required" });
+    if (!login || !password)
+      return res.status(400).json({ message: "Login and password required" });
 
-    const user = await User.findOne({ $or: [{ email: login }, { username: login }] });
+    const user = await User.findOne({ $or: [{ email: login }, { username: login }] }).select("+password");
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -116,7 +120,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Forgot password
+// ---------------- FORGOT PASSWORD ----------------
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -129,13 +133,13 @@ router.post("/forgot-password", async (req, res) => {
 
     const token = crypto.randomBytes(20).toString("hex");
     user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password/${token}`;
     console.log("Reset URL:", resetUrl);
 
-    // Uncomment in production:
+    // Uncomment in production
     // await sendResetEmail(user, resetUrl);
 
     res.status(200).json({ message: "📩 Recovery email sent successfully" });
@@ -145,7 +149,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-// Reset password
+// ---------------- RESET PASSWORD ----------------
 router.post("/reset-password/:token", async (req, res) => {
   try {
     const { token } = req.params;
@@ -160,7 +164,7 @@ router.post("/reset-password/:token", async (req, res) => {
     });
     if (!user) return res.status(400).json({ message: "Token invalid or expired" });
 
-    user.password = password; // will be hashed by pre-save
+    user.password = password; // hashed in pre-save
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
@@ -172,14 +176,14 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-// Logout
+// ---------------- LOGOUT ----------------
 router.post("/logout", (req, res) => res.json({ message: "👋 Logout successful" }));
 
-// Admin-only all-users
+// ---------------- ADMIN - GET ALL USERS ----------------
 router.get("/all-users", protect, async (req, res) => {
   try {
     if (!req.user.isAdmin) return res.status(403).json({ message: "Forbidden" });
-    const users = await User.find({});
+    const users = await User.find({}).select("-password");
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Error fetching users" });

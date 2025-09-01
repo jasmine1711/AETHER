@@ -6,24 +6,18 @@ const { protect, admin } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 /* ---------- Helpers ---------- */
-
-// sanitize paths: convert backslashes to slashes and ensure leading slash for static URLs
 const sanitizePath = (p) => {
   if (!p) return p;
   let s = String(p).replace(/\\/g, "/").trim();
   if (!s) return s;
-  if (/^https?:\/\//i.test(s)) return s; // already absolute URL
+  if (/^https?:\/\//i.test(s)) return s;
   return s.startsWith("/") ? s : `/${s}`;
 };
 
-// safe getter for first truthy element
 const firstTruthy = (arr) => (Array.isArray(arr) ? arr.find(Boolean) : null);
-
-// generate slug from text
 const toSlug = (text = "") =>
   String(text).toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9\-]/g, "");
 
-// normalize Mongoose product document for frontend
 const normalizeProduct = (prodDoc) => {
   const p = prodDoc?.toObject ? prodDoc.toObject() : prodDoc;
 
@@ -33,7 +27,7 @@ const normalizeProduct = (prodDoc) => {
   const thumbnailRaw = p.thumbnail || p.image || firstTruthy(images) || p.coverImage || null;
   const thumbnail = sanitizePath(thumbnailRaw) || "/images/placeholders/default.jpg";
 
-  const category = p.category || p.categoryName || "Uncategorized";
+  const category = p.category || "Uncategorized";
 
   return {
     id: p.id || p._id?.toString?.(),
@@ -49,29 +43,48 @@ const normalizeProduct = (prodDoc) => {
     thumbnail,
     category,
     categorySlug: toSlug(category),
-    reviews: Array.isArray(p.reviews) ? p.reviews : [],
-    numReviews: p.numReviews ?? (Array.isArray(p.reviews) ? p.reviews.length : 0),
-    rating: p.rating ?? 0,
+    numReviews: 0,
+    rating: 0,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
   };
 };
 
-/* ---------- Public Routes ---------- */
+/* ---------- Test Route (MUST be above :id) ---------- */
+router.get("/test/hello", (req, res) => {
+  res.json({ message: "Products routes are working!" });
+});
 
-// GET all products (with optional ?category & ?exclude)
+/* ---------- Public Routes ---------- */
+// GET all products with optional category, exclude, pagination
 router.get("/", async (req, res) => {
   try {
-    const { category, exclude } = req.query;
+    const { category, exclude, page = 1, limit = 12 } = req.query;
     let filter = {};
-    if (category) filter.category = category;
-    if (exclude) filter._id = { $ne: exclude };
 
-    const products = await Product.find(filter)
-      .sort({ createdAt: -1 })
-      .populate("reviews.user", "name email");
+    if (category) {
+      filter.category = new RegExp(`^${category}$`, "i"); // case-insensitive match
+    }
+    if (exclude) {
+      filter._id = { $ne: exclude };
+    }
 
-    res.json(products.map(normalizeProduct));
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const [products, total] = await Promise.all([
+      Product.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Number(limit)),
+      Product.countDocuments(filter),
+    ]);
+
+    res.json({
+      products: products.map(normalizeProduct),
+      page: Number(page),
+      pages: Math.ceil(total / Number(limit)),
+      total,
+    });
   } catch (err) {
     console.error("GET /api/products error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
@@ -81,7 +94,7 @@ router.get("/", async (req, res) => {
 // GET single product by ID
 router.get("/:id", async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate("reviews.user", "name email");
+    const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(normalizeProduct(product));
   } catch (err) {
@@ -91,7 +104,6 @@ router.get("/:id", async (req, res) => {
 });
 
 /* ---------- Admin CRUD Routes ---------- */
-
 // CREATE product
 router.post(
   "/",
@@ -164,62 +176,6 @@ router.delete("/:id", protect, admin, async (req, res) => {
     console.error("DELETE /api/products/:id error:", err);
     res.status(500).json({ message: "Delete failed", error: err.message });
   }
-});
-
-/* ---------- Reviews ---------- */
-
-// POST a review
-router.post(
-  "/:id/reviews",
-  protect,
-  [
-    body("rating", "Rating must be between 1 and 5").isInt({ min: 1, max: 5 }),
-    body("comment", "Comment is required").notEmpty(),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-    try {
-      const { rating, comment } = req.body;
-      const product = await Product.findById(req.params.id);
-      if (!product) return res.status(404).json({ message: "Product not found" });
-
-      const alreadyReviewed = product.reviews.find((r) => r.user.toString() === req.user.id);
-      if (alreadyReviewed)
-        return res.status(400).json({ message: "Product already reviewed" });
-
-      product.reviews.push({
-        name: req.user.name || "User",
-        rating: Number(rating),
-        comment,
-        user: req.user.id,
-      });
-
-      product.numReviews = product.reviews.length;
-      product.rating =
-        product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length;
-
-      await product.save();
-
-      const populatedProduct = await Product.findById(req.params.id).populate(
-        "reviews.user",
-        "name email"
-      );
-
-      res
-        .status(201)
-        .json({ message: "Review added", product: normalizeProduct(populatedProduct) });
-    } catch (err) {
-      console.error("POST /api/products/:id/reviews error:", err);
-      res.status(400).json({ message: "Review failed", error: err.message });
-    }
-  }
-);
-
-/* ---------- Test Route ---------- */
-router.get("/test/hello", (req, res) => {
-  res.json({ message: "Products routes are working!" });
 });
 
 module.exports = router;

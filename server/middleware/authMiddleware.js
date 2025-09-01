@@ -1,18 +1,15 @@
-// middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+// Protect routes - only logged-in users
 async function protect(req, res, next) {
   try {
-    // Use lowercase headers safely
     const authHeader = req.headers.authorization || req.headers.Authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "No token, authorization denied" });
     }
 
-    // Extract token correctly
     const token = authHeader.split(" ")[1].trim();
-
     if (!token) {
       return res.status(401).json({ message: "Token missing, authorization denied" });
     }
@@ -26,12 +23,11 @@ async function protect(req, res, next) {
     }
 
     // Fetch user from DB and exclude password
-    const user = await User.findById(decoded.userId).select("-password");
+    const user = await User.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(401).json({ message: "User not found, invalid token" });
     }
 
-    // Attach user to request
     req.user = user;
     req.token = token;
 

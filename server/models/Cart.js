@@ -13,8 +13,7 @@ const cartItemSchema = new mongoose.Schema({
     default: 1 
   },
   size: { 
-    type: String, 
-    required: true 
+    type: String 
   }
 });
 
@@ -29,25 +28,20 @@ const cartSchema = new mongoose.Schema(
   },
   { 
     timestamps: true,
-    toJSON: { virtuals: true }, // Ensure virtuals are included when converting to JSON
-    toObject: { virtuals: true } // Ensure virtuals are included when converting to objects
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
   }
 );
 
-// Calculate total price virtual
+// Virtual for total price
 cartSchema.virtual('totalPrice').get(function() {
-  // If items are populated with product data
   if (this.items.length > 0 && this.items[0].product && this.items[0].product.price) {
-    return this.items.reduce((total, item) => {
-      return total + (item.product.price * item.quantity);
-    }, 0);
+    return this.items.reduce((total, item) => total + item.product.price * item.quantity, 0);
   }
-  
-  // Fallback if items aren't populated (just return 0 or handle differently)
   return 0;
 });
 
-// Calculate total items count virtual
+// Virtual for total items
 cartSchema.virtual('totalItems').get(function() {
   return this.items.reduce((total, item) => total + item.quantity, 0);
 });
