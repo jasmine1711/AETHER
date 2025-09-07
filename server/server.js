@@ -6,6 +6,20 @@ const path = require("path");
 const morgan = require("morgan");
 require("dotenv").config();
 
+// ===== Validate Environment Variables =====
+const requiredEnvVars = [
+  'MONGO_URI', 
+  'JWT_SECRET', 
+  'RAZORPAY_KEY_ID', 
+  'RAZORPAY_KEY_SECRET'
+];
+
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars);
+  process.exit(1);
+}
+
 // ===== Import Routes =====
 const authRoutes = require("./routes/auth");
 const cartRoutes = require("./routes/cart");
@@ -20,14 +34,14 @@ const app = express();
 // ===== Middleware =====
 app.use(
   cors({
-    origin: process.env.CLIENT_URL?.split(",") || ["http://localhost:3000"], // ✅ support multiple origins
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.use(express.json({ limit: "10mb" })); // ✅ support larger payloads
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
 
@@ -57,7 +71,21 @@ app.use("/api/reviews", reviewRoutes);
 
 // ===== Health Check =====
 app.get("/", (req, res) => {
-  res.json({ status: "ok", message: "🎉 Backend is running and healthy!" });
+  res.json({ 
+    status: "ok", 
+    message: "🎉 Backend is running and healthy!",
+    environment: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || 5000
+  });
+});
+
+// ===== Test Razorpay Config Route =====
+app.get("/api/test-razorpay", (req, res) => {
+  res.json({
+    razorpayConfigured: !!process.env.RAZORPAY_KEY_ID && !!process.env.RAZORPAY_KEY_SECRET,
+    keyId: process.env.RAZORPAY_KEY_ID ? "Configured" : "Missing",
+    port: process.env.PORT || 5000
+  });
 });
 
 // ===== 404 Handler =====
@@ -78,6 +106,20 @@ app.use((err, req, res, next) => {
 
 // ===== Start Server =====
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0'; // Add this line
+
+app.listen(PORT, HOST, () => {  // Change this line
+  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/`);
+  console.log(`🔗 Razorpay test: http://localhost:${PORT}/api/test-razorpay`);
+  
+  // Log Razorpay configuration status
+  if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    console.log("✅ Razorpay is configured");
+  } else {
+    console.log("❌ Razorpay configuration missing");
+  }
 });
+
+module.exports = app;
