@@ -1,5 +1,5 @@
 # Node dependencies
-client/node_modules/
+
 node_modules/
 
 # Logs
@@ -7,7 +7,7 @@ node_modules/
 npm-debug.log*
 
 # Build outputs
-client/build/
+
 build/
 
 # OS files
