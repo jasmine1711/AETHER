@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+// models/Order.js
+import mongoose from "mongoose";
 
-// Sub-schema for individual order items
 const orderItemSchema = new mongoose.Schema({
   product: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
   name: { type: String, required: true },
@@ -10,15 +10,10 @@ const orderItemSchema = new mongoose.Schema({
   image: { type: String, default: "" },
 });
 
-// Main Order schema
 const orderSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-
-    // Array of ordered items
     items: { type: [orderItemSchema], required: true, default: [] },
-
-    // Shipping info
     shipping: {
       name: { type: String, default: "" },
       email: { type: String, default: "" },
@@ -28,18 +23,17 @@ const orderSchema = new mongoose.Schema(
       state: { type: String, default: "" },
       pincode: { type: String, default: "" },
     },
-
-    // Payment info
     paymentProvider: { type: String, enum: ["razorpay", "stripe"], default: "razorpay" },
     paymentStatus: { type: String, enum: ["pending", "paid", "failed"], default: "pending" },
     paymentId: { type: String, default: "" },
-
-    // Pricing
     subtotal: { type: Number, required: true, default: 0 },
     shippingFee: { type: Number, default: 0 },
     total: { type: Number, required: true, default: 0 },
+    razorpayOrderId: { type: String, default: "" }, // Add this if storing Razorpay order id
+    razorpaySignature: { type: String, default: "" }, // Add this for verification
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+export default Order;

@@ -1,7 +1,8 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const Product = require("../models/Product");
-const { protect, admin } = require("../middleware/authMiddleware");
+// ✅ FIX: Changed to ES Module syntax
+import express from "express";
+import { body, validationResult } from "express-validator";
+import Product from "../models/Product.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -178,4 +179,5 @@ router.delete("/:id", protect, admin, async (req, res) => {
   }
 });
 
-module.exports = router;
+// ✅ FIX: Changed to ES Module syntax
+export default router;

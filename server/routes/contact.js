@@ -1,5 +1,7 @@
-const express = require("express");
-const nodemailer = require("nodemailer");
+// ✅ FIX: Changed to ES Module syntax
+import express from "express";
+import nodemailer from "nodemailer";
+
 const router = express.Router();
 
 // POST /api/contact
@@ -11,7 +13,6 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Setup transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -31,7 +32,6 @@ router.post("/", async (req, res) => {
         Message: ${message}
       `,
     };
-
     await transporter.sendMail(adminMail);
 
     // 2️⃣ Send confirmation to user
@@ -41,14 +41,10 @@ router.post("/", async (req, res) => {
       subject: "We’ve received your message!",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #eee; border-radius: 10px; overflow: hidden;">
-          
-          <!-- Header -->
           <div style="background: linear-gradient(90deg, #f49ac2, #f76300, #64a6bd); color: white; padding: 1.5rem; text-align: center;">
             <h1 style="margin: 0; font-size: 1.8rem; letter-spacing: 1px;">ÆTHER</h1>
             <p style="margin: 0; font-size: 1rem;">Breathe the Vibe, Redefined for You</p>
           </div>
-
-          <!-- Body -->
           <div style="padding: 1.5rem;">
             <h2 style="color: #cf1020;">Hi ${name},</h2>
             <p>Thank you for reaching out to <strong>ÆTHER</strong>. We’ve received your message and will get back to you as soon as possible.</p>
@@ -58,25 +54,20 @@ router.post("/", async (req, res) => {
             </blockquote>
             <p>Until then, keep breathing the vibe ✨</p>
           </div>
-
-          <!-- Footer -->
           <div style="background: #fada5e; text-align: center; padding: 1rem;">
             <p style="margin: 0.5rem 0; font-weight: 600;">Follow us</p>
             <a href="https://instagram.com" style="margin: 0 8px; text-decoration: none; color: #cf1020;">Instagram</a> |
             <a href="https://twitter.com" style="margin: 0 8px; text-decoration: none; color: #cf1020;">Twitter</a> |
             <a href="https://facebook.com" style="margin: 0 8px; text-decoration: none; color: #cf1020;">Facebook</a>
-
             <p style="margin-top: 1rem; font-size: 0.9rem; color: #555;">
-              © ${new Date().getFullYear()} ÆTHER. All rights reserved.  
+              © ${new Date().getFullYear()} ÆTHER. All rights reserved.
             </p>
           </div>
         </div>
       `,
     };
-
     await transporter.sendMail(userMail);
 
-    // ✅ Success response
     res.json({ msg: "Message sent successfully and confirmation email delivered!" });
 
   } catch (error) {
@@ -85,4 +76,5 @@ router.post("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+// ✅ FIX: Changed to ES Module syntax
+export default router;

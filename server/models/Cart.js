@@ -1,49 +1,51 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const cartItemSchema = new mongoose.Schema({
-  product: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Product", 
-    required: true 
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true
   },
-  quantity: { 
-    type: Number, 
+  quantity: {
+    type: Number,
     required: true,
     min: 1,
-    default: 1 
+    default: 1
   },
-  size: { 
-    type: String 
+  size: {
+    type: String
   }
 });
 
 const cartSchema = new mongoose.Schema(
   {
-    user: { 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "User", 
-      required: true 
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
     },
     items: [cartItemSchema]
   },
-  { 
+  {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true }
   }
 );
 
-// Virtual for total price
-cartSchema.virtual('totalPrice').get(function() {
-  if (this.items.length > 0 && this.items[0].product && this.items[0].product.price) {
-    return this.items.reduce((total, item) => total + item.product.price * item.quantity, 0);
-  }
-  return 0;
+// Virtual for total price (depends on .populate("items.product"))
+cartSchema.virtual("totalPrice").get(function() {
+  if (!this.items) return 0;
+  return this.items.reduce((total, item) => {
+    // Check if product is populated and has a price
+    return item.product?.price ? total + item.product.price * item.quantity : total;
+  }, 0);
 });
 
-// Virtual for total items
-cartSchema.virtual('totalItems').get(function() {
+// Virtual for total item count
+cartSchema.virtual("totalItems").get(function() {
+  if (!this.items) return 0;
   return this.items.reduce((total, item) => total + item.quantity, 0);
 });
 
-module.exports = mongoose.model("Cart", cartSchema);
+export default mongoose.model("Cart", cartSchema);

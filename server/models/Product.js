@@ -1,4 +1,6 @@
-const mongoose = require("mongoose");
+// models/Product.js
+import mongoose from "mongoose";
+import slugify from "slugify";
 
 const reviewSchema = new mongoose.Schema(
   {
@@ -17,6 +19,11 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product name is required"],
       trim: true,
       maxLength: [100, "Product name cannot exceed 100 characters"],
+    },
+    slug: {
+      type: String,
+      unique: true,
+      index: true, // ✅ ensures faster lookups
     },
     category: {
       type: String,
@@ -85,7 +92,7 @@ const productSchema = new mongoose.Schema(
     tags: [String],
     reviews: [reviewSchema],
 
-    // ✅ rating + numReviews
+    // ✅ rating + numReviews (auto-managed)
     rating: { type: Number, default: 0 },
     numReviews: { type: Number, default: 0 },
   },
@@ -96,13 +103,34 @@ const productSchema = new mongoose.Schema(
   }
 );
 
+/* ---------------- Indexes ---------------- */
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ name: "text", description: "text" });
+productSchema.index({ slug: 1 }); // ✅ explicit index
 
+/* ---------------- Slug Middleware ---------------- */
+productSchema.pre("save", async function (next) {
+  if (this.isModified("name")) {
+    let baseSlug = slugify(this.name, { lower: true, strict: true });
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Ensure uniqueness
+    while (await this.constructor.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter++}`;
+    }
+
+    this.slug = slug;
+  }
+  next();
+});
+
+/* ---------------- Virtuals ---------------- */
 productSchema.virtual("formattedPrice").get(function () {
   return `₹${this.price.toLocaleString("en-IN")}`;
 });
 
+/* ---------------- Statics & Methods ---------------- */
 productSchema.statics.findByCategory = function (category) {
   return this.find({ category });
 };
@@ -111,5 +139,19 @@ productSchema.methods.isInStock = function () {
   return this.stock > 0;
 };
 
+/* ---------------- Hooks for reviews ---------------- */
+// Keep rating & numReviews in sync
+productSchema.pre("save", function (next) {
+  if (this.reviews?.length > 0) {
+    this.numReviews = this.reviews.length;
+    this.rating =
+      this.reviews.reduce((acc, r) => acc + r.rating, 0) / this.reviews.length;
+  } else {
+    this.numReviews = 0;
+    this.rating = 0;
+  }
+  next();
+});
+
 const Product = mongoose.model("Product", productSchema);
-module.exports = Product;
+export default Product;

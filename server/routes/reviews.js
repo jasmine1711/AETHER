@@ -1,7 +1,8 @@
-const express = require("express");
-const { body, validationResult } = require("express-validator");
-const Product = require("../models/Product");
-const { protect } = require("../middleware/authMiddleware");
+// ✅ FIX: Changed to ES Module syntax
+import express from "express";
+import { body, validationResult } from "express-validator";
+import Product from "../models/Product.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -24,7 +25,6 @@ router.post(
       const product = await Product.findById(productId);
       if (!product) return res.status(404).json({ message: "Product not found" });
 
-      // Prevent multiple reviews from the same user
       const alreadyReviewed = product.reviews.find(
         (r) => r.user.toString() === req.user._id.toString()
       );
@@ -41,7 +41,6 @@ router.post(
 
       product.reviews.push(review);
 
-      // Update stats
       product.numReviews = product.reviews.length;
       product.rating =
         product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length;
@@ -69,4 +68,5 @@ router.get("/:productId", async (req, res) => {
   }
 });
 
-module.exports = router;
+// ✅ FIX: Changed to ES Module syntax
+export default router;

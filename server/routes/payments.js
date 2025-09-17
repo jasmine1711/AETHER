@@ -1,61 +1,59 @@
-const express = require("express");
-const Razorpay = require("razorpay");
-const crypto = require("crypto");
-const { protect } = require("../middleware/authMiddleware");
-const Order = require("../models/Order");
+// routes/payments.js
+import express from "express";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import { protect } from "../middleware/authMiddleware.js";
+import Order from "../models/Order.js";
 
 const router = express.Router();
 
-// Initialize Razorpay
-let razorpay;
-try {
-  razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-  });
-  console.log("✅ Razorpay initialized successfully");
-} catch (error) {
-  console.error("❌ Razorpay initialization failed:", error.message);
+// ----- Lazy Razorpay Initialization -----
+let razorpay = null;
+
+function getRazorpay() {
+  if (!razorpay) {
+    if (process.env.RAZORPAY_KEY_ID?.trim() && process.env.RAZORPAY_KEY_SECRET?.trim()) {
+      razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID.trim(),
+        key_secret: process.env.RAZORPAY_KEY_SECRET.trim(),
+      });
+      console.log("✅ Razorpay initialized successfully");
+    } else {
+      console.warn("⚠️ Razorpay keys missing! Payment routes disabled.");
+      return null;
+    }
+  }
+  return razorpay;
 }
 
-// Test route
+// ----- Test Route -----
 router.get("/test", (req, res) => {
+  const rzp = getRazorpay();
   res.json({
     message: "🚀 Payments API is live",
-    port: process.env.PORT || 5000,
-    razorpayConfigured: !!razorpay,
-    key: process.env.RAZORPAY_KEY_ID,
+    razorpayConfigured: !!rzp,
+    key: process.env.RAZORPAY_KEY_ID || null,
   });
 });
 
-/* ------------------ Create Razorpay Order ------------------ */
-router.post("/razorpay/order", async (req, res) => {
+// ----- Create Razorpay Order -----
+router.post("/razorpay/order", protect, async (req, res) => {
   try {
-    if (!razorpay) {
-      return res.status(500).json({
-        success: false,
-        message: "Payment gateway not configured",
-      });
-    }
+    const rzp = getRazorpay();
+    if (!rzp) return res.status(500).json({ success: false, message: "Payment gateway not configured" });
 
     const { items, shipping, subtotal, shippingFee, total } = req.body;
-
-    // Allow guest or logged-in user
-    let userId = null;
-    let email = shipping.email;
-    const token = req.headers.authorization?.split(" ")[1];
-    if (token && req.user?._id) {
-      userId = req.user._id.toString();
-    }
+    const userId = req.user?._id || null;
+    const email = shipping?.email || "guest@example.com";
 
     const options = {
-      amount: Math.round(Number(total) * 100), // amount in paisa
+      amount: Math.round(Number(total) * 100), // paisa
       currency: "INR",
       receipt: `aether_${Date.now()}`,
       notes: { userId: userId || "guest", email },
     };
 
-    const rzpOrder = await razorpay.orders.create(options);
+    const rzpOrder = await rzp.orders.create(options);
 
     const newOrder = await Order.create({
       user: userId,
@@ -85,11 +83,10 @@ router.post("/razorpay/order", async (req, res) => {
   }
 });
 
-/* ------------------ Verify Razorpay Payment ------------------ */
+// ----- Verify Razorpay Payment -----
 router.post("/razorpay/verify", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, dbOrderId } = req.body;
-
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !dbOrderId) {
       return res.status(400).json({ success: false, message: "Missing verification data" });
     }
@@ -123,7 +120,7 @@ router.post("/razorpay/verify", async (req, res) => {
   }
 });
 
-/* ------------------ Get User Orders ------------------ */
+// ----- Get User Orders -----
 router.get("/my-orders", protect, async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id }).populate("items.product");
@@ -138,4 +135,4 @@ router.get("/my-orders", protect, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

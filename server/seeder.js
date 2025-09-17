@@ -55,7 +55,7 @@ const products = [
     name: "Belted Faux Leather Long Coat",
     category: "faux-leather-jackets",
     brand: "Luxury Editions",
-    price: 3499,
+    price: 5199,
     condition: "New",
     images: [
       "/images/products/Belted Faux Leather Long Coat/1.jpeg",
@@ -67,7 +67,7 @@ const products = [
     name: "Black Polka Net Top",
     category: "y2k-tops",
     brand: "Trendy Wear",
-    price: 999,
+    price: 1999,
     condition: "New",
     images: [
       "/images/products/Black Polka net top/1.jpeg",
