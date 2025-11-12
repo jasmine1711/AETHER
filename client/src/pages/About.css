@@ -1,0 +1,50 @@
+.about-page {
+  padding: 3rem 1.5rem;
+  background: #f9f9f9;
+  font-family: "Poppins", sans-serif;
+  line-height: 1.8;
+}
+
+.about-page .container {
+  max-width: 900px;
+  margin: auto;
+  text-align: left;
+}
+
+.about-page h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #cf1020; /* Bold brand red */
+}
+
+/* First Paragraph Highlight */
+.about-page p:first-of-type {
+  background: #fada5e;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Middle paragraphs - normal text with a touch of style */
+.about-page p {
+  margin-bottom: 1.2rem;
+  color: #444;
+}
+
+/* Brand Motto (last line) */
+.about-page p:last-of-type {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 1rem;
+  border-left: 6px solid #48d1cc;
+  border-right: 6px solid #48d1cc;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f49ac2, #f76300, #64a6bd);
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}

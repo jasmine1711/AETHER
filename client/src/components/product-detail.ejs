@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= product.name %> - ÆTHER</title>
+    <link rel="stylesheet" href="/css/product-detail.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+    
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/">Home</a> &gt; 
+            <a href="/products">Products</a> &gt; 
+            <a href="/products/<%= product.category.toLowerCase() %>"><%= product.category %></a> &gt; 
+            <span><%= product.name %></span>
+        </div>
+        
+        <div class="product-detail">
+            <div class="product-gallery">
+                <div class="main-image">
+                    <img src="<%= product.images[0] %>" alt="<%= product.name %>" id="main-product-image">
+                    <% if (product.isThrifted) { %>
+                        <div class="thrifted-badge">Thrifted</div>
+                    <% } %>
+                </div>
+                <div class="thumbnail-container">
+                    <% product.images.forEach((image, index) => { %>
+                        <div class="thumbnail <%= index === 0 ? 'active' : '' %>" data-image="<%= image %>">
+                            <img src="<%= image %>" alt="Thumbnail <%= index + 1 %>">
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+            
+            <div class="product-info">
+                <h1 class="product-title"><%= product.name %></h1>
+                <p class="product-price">₹<%= (product.price/100).toFixed(2) %></p>
+                
+                <div class="product-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span><%= product.category %></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Condition: <%= product.condition %></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-box"></i>
+                        <span><%= product.stock %> in stock</span>
+                    </div>
+                </div>
+                
+                <p class="product-description"><%= product.description %></p>
+                
+                <div class="size-selection">
+                    <h3 class="size-title">Select Size</h3>
+                    <div class="size-options">
+                        <% product.sizes.forEach(size => { %>
+                            <label class="size-option">
+                                <input type="radio" name="size" value="<%= size %>">
+                                <span><%= size %></span>
+                            </label>
+                        <% }) %>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-add-to-cart" id="add-to-cart">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                    </button>
+                    <button class="btn-buy-now" id="buy-now">
+                        <i class="fas fa-bolt"></i> Buy Now
+                    </button>
+                </div>
+                
+                <div class="product-features">
+                    <h3>Product Details</h3>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Premium quality materials</li>
+                        <li><i class="fas fa-check"></i> Ethically sourced</li>
+                        <li><i class="fas fa-check"></i> Eco-friendly packaging</li>
+                        <li><i class="fas fa-check"></i> Free returns within 30 days</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <%- include('partials/footer') %>
+    
+    <script src="/js/product-detail.js"></script>
+</body>
+</html>

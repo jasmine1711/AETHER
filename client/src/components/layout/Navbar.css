@@ -1,0 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600&display=swap');
+
+.navbar {
+  width: 100%;
+  background-color: #64A6BD; /* Neptune (Fountain Blue) */
+  color: #FFFFFF;
+   display: flex;
+  padding: 0.75rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.navbar-logo {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #FADA5E; /* Light Gold */
+  text-decoration: none;
+  letter-spacing: 1px;
+  font-family: 'Playfair Display', serif;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  flex: 1;
+  text-align: left;
+
+}
+
+.navbar-links {
+    flex: 2;
+  justify-content: center;
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  margin: 0;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: #FFFFFF;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar-links a:hover {
+  color: #FADA5E;
+  text-shadow: 0 0 8px rgba(250, 218, 94, 0.5);
+}
+
+/* Right side icons */
+.navbar-right {
+  flex:1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Cart / Wishlist icons */
+.navbar-cart, .navbar-wishlist {
+  position: relative;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.navbar-cart:hover {
+  color: #48D1CC; /* Medium Turquoise */
+}
+
+.navbar-wishlist:hover {
+  color: #CF1020; /* Lava Red */
+}
+
+/* Badge for cart/wishlist count */
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background: #CF1020; /* Lava Red */
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Buttons */
+.navbar-btn {
+  background: #FADA5E; /* Light Gold */
+  color: #333333;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 999px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.navbar-btn:hover {
+  background: #F49AC2; /* Pastel Magenta */
+  color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(244,154,194,0.5);
+  transform: translateY(-2px);
+}
+
+/* Payment status badges */
+.payment-status {
+  margin-left: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.payment-status.success {
+  background-color: #48D1CC; /* Medium Turquoise */
+  color: #FFFFFF;
+}
+
+.payment-status.failed {
+  background-color: #CF1020; /* Lava Red */
+  color: #FFFFFF;
+}
+
+.payment-status.pending {
+  background-color: #F76300; /* Orange */
+  color: #FFFFFF;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0.75rem 1rem;
+  }
+
+  .navbar-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .navbar-links {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .navbar-right {
+    gap: 0.75rem;
+  }
+}
+
+/* ============================ */
+/* ✅ Added new changes below   */
+/* ============================ */
+
+/* Navbar icons wrapper */
+.nav-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* space between icons */
+  position: relative;
+}
+
+/* Ensure each icon container has its own box */
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Keep wishlist to the left of cart */
+.icon-wishlist { order: 1; }
+.icon-cart { order: 2; }
+
+/* Badge on cart/wishlist */
+.icon-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  padding: 0 4px;
+  background: var(--accent, #CF1020); /* fallback Lava Red */
+  color: #fff;
+  z-index: 20;
+}
+
+/* Product image container — heart above image */
+.product-card {
+  position: relative;
+  overflow: visible;
+}
+.product-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* Heart icon on product card */
+.product-heart {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 30;
+  background: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}

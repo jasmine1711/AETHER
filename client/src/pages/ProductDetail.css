@@ -1,0 +1,381 @@
+ /* ================= GLOBAL & PRODUCTS PAGE ================= */
+
+/* This single container rule can be used on both pages */
+.container {
+  width: 100%;
+  max-width: 1400px; /* Use the larger width for both */
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.products-page {
+  background-color: #faf9f6; /* subtle vintage off-white */
+  min-height: 100vh;
+  padding: 2rem 0; /* Adjusted padding to be consistent */
+  width: 100%; 
+}
+
+/* Product grid */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 2rem;
+  align-items: stretch;
+}
+
+/* Animate fade-up */
+.product-link.fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+.product-link.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Loading state */
+.products-loading {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 4rem 0;
+  color: #555;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+}
+@media (max-width: 640px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+/* ================= PRODUCT DETAIL PAGE ================= */
+.product-detail {
+  padding: 2rem 0;
+  min-height: 70vh;
+  background-color: #FAF6EC;
+  width: 100%;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: #64A6BD;
+}
+
+.breadcrumb a {
+  color: #48D1CC;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+.breadcrumb a:hover {
+  color: #CF1020;
+  text-shadow: 0 0 6px #FADA5E;
+}
+.breadcrumb-current {
+  color: #64A6BD;
+  font-weight: 600;
+}
+
+/* Product Detail Content Grid */
+.product-detail-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Product Gallery */
+.product-gallery {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 500px;
+}
+.main-image {
+  position: relative;
+  width: 100%;
+  height: 550px;
+  overflow: hidden;
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.main-image:hover img {
+  transform: scale(1.05);
+}
+.thrifted-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: #FADA5E;
+  color: #64A6BD;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.image-thumbnails {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap; /* --- THIS IS THE FIX --- Allows thumbnails to wrap to the next line */
+}
+.thumbnail {
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  background: #fff;
+}
+.thumbnail.active,
+.thumbnail.selected-thumbnail {
+  border-color: #CF1020;
+  box-shadow: 0 0 8px #FADA5E;
+}
+.thumbnail:hover {
+  border-color: #CF1020;
+  transform: translateY(-3px);
+}
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Product Info */
+.product-info {
+  flex: 1 1 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.product-header {
+  font-size: 2.5rem;
+  color: #64A6BD;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+.product-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: #48D1CC;
+}
+.condition-badge {
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+.condition-badge.new {
+  background: #F49AC2;
+  color: #fff;
+}
+.condition-badge.used {
+  background: #F76300;
+  color: #fff;
+}
+.product-price {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #CF1020;
+  margin-bottom: 1.5rem;
+}
+.product-description {
+  white-space: normal;
+  overflow: visible;
+  word-break: break-word;
+  max-height: none;
+  color: #64A6BD;
+}
+
+/* Product Detail Actions */
+.product-detail-actions {
+  background-color: #FAF6EC;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.product-detail-actions button {
+  background: linear-gradient(135deg, #64A6BD, #48D1CC);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.product-detail-actions button:hover {
+  background: linear-gradient(135deg, #F76300, #CF1020);
+  box-shadow: 0 0 12px rgba(207,16,32,0.5);
+}
+
+/* Size & Quantity */
+.size-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+.size-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid #48D1CC;
+  border-radius: 8px;
+  background: #fff;
+  color: #48D1CC;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.size-btn.selected {
+  background: #CF1020;
+  color: #fff;
+  border-color: #CF1020;
+}
+
+/* ❌ Size Validation Alert */
+.size-alert {
+  color: #CF1020;
+  background-color: #ffe6e6; /* subtle pink/red background */
+  border: 1px solid #cf1020;
+  padding: 0.5rem 1rem;
+    border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+.size-alert.active {
+  display: block;
+}
+
+/* Quantity */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.quantity-btn {
+  padding: 0.3rem 0.8rem;
+  background: #CF1020;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.quantity-btn:hover {
+  background: #F76300;
+}
+.quantity-display {
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Buttons */
+.btn-add-to-cart {
+  background: #CF1020;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn-add-to-cart:hover:not(:disabled) {
+  background: #F76300;
+  box-shadow: 0 0 10px #FADA5E;
+}
+.btn-buy-now {
+  background: #48D1CC;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.btn-buy-now:hover:not(:disabled) {
+  background: #64A6BD;
+  box-shadow: 0 0 10px #FADA5E;
+}
+
+/* Related Products */
+.product-features {
+  margin-top: 3rem;
+}
+.product-features h3 {
+  margin-bottom: 1rem;
+}
+/* This rule was conflicting with the main product grid, I've specified it more clearly */
+.product-features .products-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+.product-features ul li {
+  color: #48D1CC;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= ADDITIONAL IMAGES GRID ================= */
+
+.additional-images-section {
+  margin-top: 2.5rem; /* Adds space above the new section */
+  padding-top: 1.5rem; /* Adds space inside the top border */
+  border-top: 1px solid #e0e0e0; /* Adds a separator line */
+}
+
+.additional-images-section h4 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.additional-images-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* Space between images */
+}
+
+.grid-image-item {
+  width: calc(50% - 0.5rem); /* Creates a two-column layout */
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  border: 1px solid #eee;
+}
+
+.grid-image-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}

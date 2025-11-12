@@ -1,0 +1,24 @@
+.order-card {
+  background: #fdfdfd;
+  border-color: #F49AC2;
+}
+
+.payment-status {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.payment-status.success {
+  background-color: #48D1CC;
+}
+
+.payment-status.failed {
+  background-color: #CF1020;
+}
+
+.payment-status.pending {
+  background-color: #F76300;
+}

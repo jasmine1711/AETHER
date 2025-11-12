@@ -1,0 +1,91 @@
+.contact-page {
+  padding: 3rem 1.5rem;
+  background: #f9f9f9;
+  font-family: "Poppins", sans-serif;
+}
+
+.contact-page .container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.contact-page h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #cf1020; /* Brand red */
+  text-align: center;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contact-form label {
+  font-weight: 500;
+  color: #333;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: #48d1cc; /* Teal highlight */
+  outline: none;
+  box-shadow: 0 0 6px rgba(72, 209, 204, 0.4);
+}
+
+.contact-form button {
+  background: linear-gradient(90deg, #f49ac2, #f76300, #64a6bd);
+  color: white;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.contact-form button:hover {
+  transform: scale(1.05);
+}
+
+/* Shared */
+.status {
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.8rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Success */
+.status.success {
+  background: #48d1cc;
+  color: white;
+  box-shadow: 0 3px 10px rgba(72, 209, 204, 0.4);
+}
+
+/* Error */
+.status.error {
+  background: #cf1020;
+  color: white;
+  box-shadow: 0 3px 10px rgba(207, 16, 32, 0.4);
+}
+
+/* Sending */
+.status.sending {
+  background: #fada5e;
+  color: #333;
+  box-shadow: 0 3px 10px rgba(250, 218, 94, 0.4);
+}

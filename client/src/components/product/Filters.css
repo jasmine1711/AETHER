@@ -1,0 +1,35 @@
+/* src/components/layout/Filters.css */
+.filters {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  padding: 0.6rem 1.5rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: white;
+  border-color: #6a11cb;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    gap: 0.5rem;
+  }
+  
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
