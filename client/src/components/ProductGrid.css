@@ -1,0 +1,51 @@
+/*
+  This CSS defines the FINAL layout of the grid.
+  The scroll animation (animating from invisible to visible) is handled by GSAP in ProductGrid.jsx.
+*/
+.product-grid-section {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-grid-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.collection-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 3rem;
+  font-style: italic;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* Add this to ensure individual cards don't have unexpected visibility styles */
+/* Assuming your ProductCard has a root element you can style, or this will apply to the component's root */
+.product-grid > * {
+  /* This helps prevent a "flash" of content before the animation starts */
+  visibility: visible; /* GSAP will handle opacity */
+}
+
+@media (max-width: 768px) {
+  .product-grid-section {
+    padding: 2rem 1rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .product-grid-section h2 {
+    font-size: 2rem;
+  }
+}

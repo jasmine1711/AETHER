@@ -1,0 +1,46 @@
+.marquee-container {
+  width: 100%;
+  overflow: hidden; /* Crucial: Hides the text when it's outside the container */
+  background-color: #f8f8f8; /* A light background color */
+  padding: 20px 0;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.marquee-content {
+  display: flex;
+  white-space: nowrap; /* Crucial: Prevents the text from wrapping */
+  animation: scroll 30s linear infinite; /* The animation magic */
+}
+
+.marquee-content span {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0 40px; /* Space between text segments */
+  text-transform: uppercase;
+}
+
+/* Optional: Styles for icons if you use them */
+.marquee-icon {
+  width: 24px;
+  height: 24px;
+  margin: 0 20px;
+  vertical-align: middle;
+}
+
+/* The CSS animation definition */
+@keyframes scroll {
+  from {
+    transform: translateX(0%);
+  }
+  to {
+    /* Moves the content to the left by half its width to complete the loop */
+    transform: translateX(-50%); 
+  }
+}
+
+/* Optional: Pause animation on hover */
+.marquee-container:hover .marquee-content {
+  animation-play-state: paused;
+}

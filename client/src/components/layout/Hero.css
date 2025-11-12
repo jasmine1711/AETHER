@@ -1,0 +1,445 @@
+/* src/components/layout/Hero.css */
+.hero {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Each slide */
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.hero-slide.prev {
+  z-index: 0;
+}
+
+/* Images and videos inside slides */
+.hero-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Gradient overlay */
+.hero-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg,
+    rgba(100, 166, 189, 0.7), /* Neptune */
+    rgba(244, 154, 194, 0.5) /* Pastel Magenta */
+  );
+  z-index: 2;
+}
+
+/* Glow effect behind content */
+.hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(
+    circle,
+    rgba(207, 16, 32, 0.4) 0%, /* Lava Red */
+    rgba(0, 0, 0, 0) 70%
+  );
+  z-index: 3;
+  filter: blur(40px);
+}
+
+/* Overlay for text content */
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+
+.hero-content {
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 2rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Hero title and subtitle */
+.hero-title {
+  font-family: "Playfair Display", serif;
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: 2px;
+  color: #fff9e6;
+}
+
+.hero-sub {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
+}
+
+/* Call to action button */
+.hero-cta {
+  padding: 15px 40px;
+  background: linear-gradient(45deg, #f76300, #f49ac2);
+  color: white;
+  border: none;
+  font-weight: 600;
+  border-radius: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  font-family: "Poppins", sans-serif;
+}
+
+.hero-cta:hover {
+  background: linear-gradient(45deg, #f49ac2, #fada5e);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Slide indicators/dots */
+.hero-dots {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  z-index: 5;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(244, 154, 194, 0.5);
+  margin: 0 8px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.dot.on {
+  background: #fada5e;
+  transform: scale(1.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero {
+    height: 80vh;
+  }
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  .hero-sub {
+    font-size: 1.2rem;
+  }
+  .hero-cta {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    height: 70vh;
+  }
+  .hero-title {
+    font-size: 2rem;
+  }
+  .hero-sub {
+    font-size: 1rem;
+  }
+  .hero-cta {
+    padding: 10px 25px;
+  }
+  .hero-dots {
+    bottom: 20px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    margin: 0 6px;
+  }
+}
+
+/* Main container that is pinned by GSAP to create the scroll effect */
+.story-hero-container {
+  position: relative;
+  width: 100%;
+  height: 100vh; /* It must start at 100vh for the pin to work correctly */
+  overflow: hidden;
+}
+
+/* --- Curtain Intro Animation Styles --- */
+.curtain-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 100; /* Starts on top of everything */
+  display: flex;
+  pointer-events: none; /* Allows clicks and scrolls to go through after the animation */
+}
+
+.curtain {
+  width: 33.34%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.curtain-bg {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.1); /* Slight zoom for a more premium feel */
+}
+
+/* --- Scrollytelling Panel Styles --- */
+.story-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0; /* All panels start invisible; GSAP controls their visibility */
+  /* REMOVED: background-size and background-position are gone */
+}
+
+/* The first panel is made visible by default by the JS component */
+.story-panel:first-child {
+  opacity: 1;
+  z-index: 1;
+}
+.story-panel:not(:first-child) {
+  z-index: 2; /* Ensures new panels animate on top of old ones */
+}
+
+.panel-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* A subtle dark overlay on all panels helps with text readability */
+  background: rgba(0,0,0,0.3); 
+}
+
+/* ADDED: New rule for the image tag to control its fit and position */
+.story-media-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Keeps the aspect ratio and fills the screen */
+  object-position: center top; /* THE FIX: Keeps the top of the image visible */
+  z-index: -1; /* Sits behind the .panel-content overlay */
+}
+
+/* Video specific styling */
+.story-media-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1; /* Sits behind the .panel-content overlay */
+}
+
+/* Text panel styling */
+.text-panel {
+  color: white;
+  background-color: rgba(20, 20, 20, 0.8);
+  padding: 3rem 4rem;
+  border-radius: 12px;
+  max-width: 650px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.text-panel h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #FADA5E; /* Naples Yellow from your theme */
+  font-weight: 700;
+}
+
+.text-panel p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.7;
+}
+
+/* --- Responsive Design for Mobile --- */
+@media (max-width: 768px) {
+  .text-panel {
+    padding: 2rem;
+    max-width: 90%;
+  }
+
+  .text-panel h2 {
+    font-size: 2rem;
+  }
+
+  .text-panel p {
+    font-size: 1rem;
+  }
+}
+/* All previous CSS in this file has been replaced with the following: */
+
+/* Main container for the new section */
+.philosophy-section {
+  display: flex; /* Key property to create columns */
+  align-items: center; /* Vertically aligns the text and image columns */
+  gap: 4rem; /* Space between the text and image columns */
+  padding: 100px 5%; /* Top/bottom and left/right spacing */
+  background-color: #f9f9f9; /* A soft, light background color */
+  min-height: 90vh; /* Ensures the section has ample height */
+}
+
+/* Column 1: Text container */
+.philosophy-text-content {
+  flex: 1; /* Tells this column to take up half the available space */
+  max-width: 550px; /* Prevents the text lines from becoming too long and hard to read */
+}
+
+.philosophy-text-content h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 3rem; /* Large, impactful heading */
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+}
+
+.philosophy-text-content p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8; /* Generous line spacing for readability */
+  color: #555;
+}
+
+/* Column 2: Image gallery container */
+.philosophy-image-gallery {
+  flex: 1; /* Tells this column to take up the other half of the space */
+  display: flex;
+  flex-direction: column; /* Stacks the two images vertically */
+  gap: 1.5rem; /* Space between the two images */
+}
+
+.image-wrapper {
+  overflow: hidden; /* Ensures the hover effect doesn't break the layout */
+  border-radius: 8px; /* Soft rounded corners */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.image-wrapper img {
+  width: 100%;
+  height: auto;
+  display: block; /* Removes any extra space below the image */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth zoom effect */
+}
+
+.image-wrapper:hover img {
+  transform: scale(1.05); /* Slight zoom on hover */
+}
+
+
+/* --- Responsive Design --- */
+/* For tablets and smaller devices */
+@media (max-width: 992px) {
+  .philosophy-section {
+    flex-direction: column; /* Stack the columns on top of each other */
+    text-align: center; /* Center the text for a better look on mobile */
+    gap: 3rem;
+  }
+
+  .philosophy-text-content {
+    max-width: 100%;
+  }
+}
+
+/* For mobile phones */
+@media (max-width: 576px) {
+  .philosophy-section {
+    padding: 60px 5%;
+  }
+
+  .philosophy-text-content h2 {
+    font-size: 2.2rem;
+  }
+
+  .philosophy-text-content p {
+    font-size: 1rem;
+  }
+}
+/* --- ADD THESE STYLES FOR THE VIDEO SECTION --- */
+
+.video-showcase-section {
+  display: flex;
+  width: 100%;
+  background-color: #f9f9f9; /* Matches the philosophy section background */
+  padding: 0 5% 100px 5%; /* Adds space below the videos */
+  gap: 1.5rem; /* Creates space between the videos */
+}
+
+.video-container {
+  flex: 1; /* Each container takes up half the space */
+  overflow: hidden;
+  border-radius: 8px; /* Matching the style of the images */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.showcase-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- ADD THIS TO YOUR RESPONSIVE SECTION --- */
+/* You should already have a @media (max-width: 768px) rule,
+   you can add this inside it */
+
+@media (max-width: 768px) {
+  .video-showcase-section {
+    flex-direction: column; /* Stack the videos on smaller screens */
+    padding-bottom: 60px;
+  }
+}

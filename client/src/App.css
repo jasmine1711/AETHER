@@ -1,0 +1,678 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+/* -------------------- Global Reset -------------------- */
+/* ADD THIS TO YOUR GLOBAL CSS FILE (App.css or index.css) */
+
+html {
+  width: 100%;
+  overflow-x: hidden; /* This is key to prevent horizontal scrollbars */
+}
+
+/* If you have a main .App container, ensure it is also full-width */
+.App {
+  width: 100%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* --- FIX: Ensure body is full-width and prevents horizontal scroll --- */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f8f8;
+  color: #42403f;
+  line-height: 1.6;
+  width: 100%;
+  overflow-x: hidden; /* Prevents unwanted horizontal scrollbars */
+}
+/* Fly-to-cart image */
+.flying-img {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  pointer-events: none;
+  transition: transform 0.8s cubic-bezier(.2,.8,.2,1), opacity 0.8s;
+  z-index: 9999;
+}
+
+/* Cart bounce */
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+  100% { transform: translateY(0); }
+}
+.icon-cart.cart-bounce {
+  animation: bounce 420ms ease;
+}
+
+/* -------------------- Theme Variables -------------------- */
+:root {
+  --pastel-magenta: #F49AC2;
+  --naples-yellow: #FADA5E;
+  --jellyfish-turquoise: #48D1CC;
+  --basketball-orange: #F76300;
+  --neptune-blue: #64A6BD;
+  --lava-red: #CF1020;
+  --light-beige: #FFF9E6;
+  --text-color: #42403f;
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+}
+
+/* --- FIX: Ensure the main App container is also full-width --- */
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%; /* Explicitly set width */
+}
+
+.main-content {
+  flex-grow: 1;
+}
+
+/* -------------------- Navigation -------------------- */
+/* This section is correct. The background is on the full-width wrapper. */
+.main-navigation {
+  background-color: var(--light-beige);
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 10px rgba(250, 218, 94, 0.2);
+  font-family: 'Playfair Display', serif;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%; /* Ensure it spans the full width */
+}
+
+/* This is the inner container for content, which is correctly constrained. */
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-logo h2 {
+  color: var(--neptune-blue);
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: var(--transition);
+  font-family: 'Poppins', sans-serif;
+}
+
+.nav-links a:hover {
+  color: var(--basketball-orange);
+}
+
+.nav-icons {
+  display: flex;
+  gap: 1rem;
+}
+
+.icon-btn {
+  background-color: var(--pastel-magenta);
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: white;
+  font-size: 1.2rem;
+}
+
+.icon-btn:hover {
+  background-color: var(--lava-red);
+  transform: scale(1.1);
+}
+
+/* -------------------- Hero Section -------------------- */
+.hero {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.hero-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.hero-slide.prev {
+  z-index: 0;
+}
+
+.hero-media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    45deg, 
+    rgba(100, 166, 189, 0.7), /* Neptune (Fountain Blue) */
+    rgba(244, 154, 194, 0.5)  /* Pastel Magenta */
+  );
+  z-index: 2;
+}
+
+.hero-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(
+    circle, 
+    rgba(207, 16, 32, 0.4) 0%, /* Lava Red */
+    rgba(0, 0, 0, 0) 70%
+  );
+  z-index: 3;
+  filter: blur(40px);
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4;
+}
+
+.hero-content {
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 2rem;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+  font-family: 'Playfair Display', serif;
+}
+
+.hero-sub {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.7);
+}
+
+.hero-cta {
+  padding: 15px 40px;
+  background: linear-gradient(45deg, #F76300, #F49AC2); /* Basketball Orange to Pastel Magenta */
+  color: white;
+  border: none;
+  font-weight: 600;
+  border-radius: 30px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  font-family: 'Poppins', sans-serif;
+}
+
+.hero-cta:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(45deg, #F49AC2, #FADA5E); /* Pastel Magenta to Naples Yellow */
+}
+
+.hero-dots {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  z-index: 5;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(244, 154, 194, 0.5); /* Pastel Magenta */
+  margin: 0 8px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.dot.on {
+  background: #FADA5E; /* Naples Yellow */
+  transform: scale(1.3);
+}
+
+/* -------------------- Animated Category Section (NEW) -------------------- */
+.category-showcase-container {
+  height: 200vh;
+  padding: 50px 5%;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.category-showcase-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.5rem;
+  margin-bottom: 50px;
+  color: #222;
+  font-weight: 500;
+}
+
+.category-viewport {
+  position: sticky;
+  top: 100px;
+  height: 500px;
+  max-width: 1200px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.category-rows-animator {
+  position: relative;
+  width: 100%;
+}
+
+.category-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  width: 100%;
+  margin-bottom: 50px;
+}
+
+.category-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.category-item img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.category-item:hover img {
+  transform: scale(1.05);
+}
+
+.category-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: white;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  padding: 30px 15px 15px 15px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+
+/* -------------------- Product Grid Section -------------------- */
+.product-grid-section {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-grid-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-family: 'Playfair Display', serif;
+}
+
+.collection-subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 3rem;
+  font-style: italic;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+/* -------------------- Product Card -------------------- */
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.product-image-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.product-badge.new {
+  background-color: #64A6BD; /* Neptune */
+  color: white;
+}
+
+.product-badge.sale {
+  background-color: #CF1020; /* Lava Red */
+  color: white;
+}
+
+.product-badge.vintage {
+  background-color: #FADA5E; /* Naples Yellow */
+  color: #333;
+}
+
+.product-badge.y2k {
+  background-color: #F49AC2; /* Pastel Magenta */
+  color: white;
+}
+
+.product-badge.trending {
+  background-color: #F76300; /* Basketball Orange */
+  color: white;
+}
+
+.product-badge.luxury {
+  background: linear-gradient(45deg, #FADA5E, #F49AC2); /* Naples Yellow to Pastel Magenta */
+  color: #333;
+}
+
+.product-badge.vegan {
+  background-color: #48D1CC; /* Jellyfish */
+  color: white;
+}
+
+.quick-view-btn {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  opacity: 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.product-card:hover .quick-view-btn {
+  bottom: 15px;
+  opacity: 1;
+}
+
+.product-info {
+  padding: 1.5rem;
+}
+
+.product-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.product-brand {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.product-category {
+  color: #888;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  margin-bottom: 1rem;
+}
+
+.product-price-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.product-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.product-condition {
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #666;
+}
+
+.add-to-cart-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(45deg, #F49AC2, #64A6BD); /* Pastel Magenta to Neptune */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.add-to-cart-btn:hover {
+  background: linear-gradient(45deg, #64A6BD, #F49AC2); /* Neptune to Pastel Magenta */
+  transform: translateY(-2px);
+}
+
+/* View All Button */
+.view-all {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.btn-view-all {
+  display: inline-block;
+  padding: 12px 30px;
+  background-color: var(--basketball-orange);
+  color: white;
+  text-decoration: none;
+  border-radius: 30px;
+  font-weight: 600;
+  transition: var(--transition);
+  font-family: 'Poppins', sans-serif;
+}
+
+.btn-view-all:hover {
+  background-color: var(--lava-red);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* -------------------- 404 Page -------------------- */
+.not-found {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.not-found h1 {
+  font-size: 4rem;
+  color: var(--basketball-orange);
+  margin-bottom: 10px;
+}
+
+.not-found p {
+  font-size: 1.2rem;
+  color: var(--neptune-blue);
+  margin-bottom: 20px;
+}
+
+.btn-home {
+  text-decoration: none;
+  padding: 12px 25px;
+  background-color: var(--naples-yellow);
+  color: var(--text-color);
+  border-radius: var(--border-radius);
+  font-weight: bold;
+  transition: var(--transition);
+}
+
+.btn-home:hover {
+  background-color: #e0c953;
+}
+
+/* -------------------- Responsive Design -------------------- */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .hero-sub {
+    font-size: 1.2rem;
+  }
+  
+  .hero-cta {
+    padding: 12px 30px;
+  }
+  
+  .product-grid-section {
+    padding: 2rem 1rem;
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .product-grid-section h2 {
+    font-size: 2rem;
+  }
+  
+  .product-image-container {
+    height: 220px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-navigation {
+    padding: 1rem;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+  
+  .hero-sub {
+    font-size: 1rem;
+  }
+  
+  .product-grid-section {
+    padding: 2rem 1rem;
+  }
+  
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .product-info {
+    padding: 1rem;
+  }
+}
