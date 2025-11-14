@@ -139,16 +139,31 @@ export function CartWishlistProvider({ children }) {
     }
   }, [wishlist, token, loading]);
 
-  // ================== CART ==================
+ // ================== CART ==================
   const addToCart = useCallback(
     async (item) => {
+      // 🔍 DEBUG: If item is a string (ID) instead of object, warn the developer
+      if (typeof item === "string") {
+        console.error(" ERROR: addToCart expects a full Product Object, but received a String ID:", item);
+        console.warn(" Fix: Call addToCart(product) instead of addToCart(product._id)");
+        return;
+      }
+
       const normalized = normalizeItem(item);
+      
+      // 🛡️ SAFETY CHECK: Ensure we actually have a Product ID
+      if (!normalized._id) {
+        console.error(" ERROR: Item is missing '_id'. cannot add to cart.", item);
+        return;
+      }
+
       const payload = {
         productId: normalized._id,
         quantity: normalized.quantity || 1,
         size: normalized.size,
       };
 
+      // 1. Optimistic UI Update (Immediate feedback for user)
       if (!token) {
         setCart((prev) => {
           const idx = prev.findIndex(
@@ -166,6 +181,7 @@ export function CartWishlistProvider({ children }) {
         return;
       }
 
+      // 2. Server Request
       try {
         const { data } = await authApi.post("/cart", payload);
         if (data?.items) {
@@ -241,18 +257,35 @@ export function CartWishlistProvider({ children }) {
     setCart([]);
   }, [token, authApi]);
 
-  // ================== WISHLIST ==================
+ // ================== WISHLIST ==================
   const addToWishlist = useCallback(
     async (item) => {
+      // 🔍 DEBUG: If item is a string (ID) instead of object, warn the developer
+      if (typeof item === "string") {
+        console.error("ERROR: addToWishlist expects a full Product Object, but received a String ID:", item);
+        console.warn(" Fix: Call addToWishlist(product) instead of addToWishlist(product._id)");
+        return;
+      }
+      
       const normalized = normalizeItem(item);
+
+      // 🛡️ SAFETY CHECK: Ensure we actually have a Product ID
+      if (!normalized._id) {
+        console.error(" ERROR: Item is missing '_id'. cannot add to wishlist.", item);
+        return;
+      }
+      
       const payloadId = normalized._id;
 
+      // 1. Optimistic UI Update (Immediate feedback for user)
       if (!token) {
         setWishlist((prev) =>
           prev.some((p) => p.id === normalized.id) ? prev : [...prev, normalized]
         );
         return;
       }
+
+      // 2. Server Request
       try {
         const { data } = await authApi.post(`/wishlist/${payloadId}`);
         if (data?.products) {
@@ -262,7 +295,7 @@ export function CartWishlistProvider({ children }) {
         handleError(err, "Failed to add item to wishlist.");
       }
     },
-    [token, wishlist, normalizeItem, authApi]
+    [token, normalizeItem, authApi] 
   );
 
   const removeFromWishlist = useCallback(

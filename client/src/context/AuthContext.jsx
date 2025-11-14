@@ -95,28 +95,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (credentials) => {
-    try {
-      dispatch({ type: "AUTH_START" });
+  
+const login = async (credentials) => {
+    try {
+      dispatch({ type: "AUTH_START" });
       
-      // THE TYPO WAS HERE
-      const payload = {
-        login: credentials.email || credentials.username || credentials.login,
-        password: credentials.password, //  CORRECTED from 'ppassword'
-      };
+      const payload = {
+      
+        login: (credentials.email || credentials.username || credentials.login).toLowerCase(),
+        password: credentials.password, 
+      };
 
-      console.log("🔑 Sending corrected login request:", payload); // Added a log for confirmation
-      const { data } = await axios.post(`${API_BASE}/auth/login`, payload);
-      setAuthToken(data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-      dispatch({ type: "AUTH_SUCCESS", payload: { user: data.user, token: data.token } });
-      return { success: true, message: data.message, user: data.user };
-    } catch (err) {
-      const message = err.response?.data?.message || "Login failed. Check your credentials.";
-      dispatch({ type: "AUTH_FAILURE", payload: message });
-      return { success: false, message };
-    }
-  };
+      console.log(" Sending corrected login request:", payload); 
+      const { data } = await axios.post(`${API_BASE}/auth/login`, payload);
+      
+      setAuthToken(data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      dispatch({ type: "AUTH_SUCCESS", payload: { user: data.user, token: data.token } });
+      
+      return { success: true, message: data.message, user: data.user };
+    } catch (err) {
+      const message = err.response?.data?.message || "Login failed. Check your credentials.";
+      dispatch({ type: "AUTH_FAILURE", payload: message });
+      return { success: false, message };
+    }
+  };
 
   const logout = async () => {
     try {

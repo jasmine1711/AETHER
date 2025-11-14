@@ -32,14 +32,11 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ success: false, message: msg });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const user = await User.create({
       name,
       username,
       email: email.toLowerCase(),
-      password: hashedPassword,
+      password: password,
     });
 
     const token = generateToken(user._id);
@@ -60,11 +57,14 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { login, password } = req.body;
+    
+    console.log("Login attempt received. Body:", req.body);
+    console.log(`Looking for user with (from req.body.login): ${login}`);
 
     if (!login || !password) {
       return res.status(400).json({ success: false, message: "Email/Username and password required" });
     }
-
+    
     const isEmail = login.includes("@");
    let user = await User.findOne(isEmail ? { email: login.toLowerCase() } : { username: login }).select("+password");
 
@@ -74,6 +74,7 @@ router.post("/login", async (req, res) => {
 
     if (!user) return res.status(401).json({ success: false, message: "Invalid credentials" });
 
+        // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ success: false, message: "Invalid credentials" });
 

@@ -37,12 +37,13 @@ const ProductCard = forwardRef(({ product }, ref) => {
     setWishlisted(isInWishlist(pid));
   }, [isInWishlist, pid]);
 
-  // ✅ Add to Cart
+ // ✅ Add to Cart
   const handleAddToCart = (e) => {
     e.preventDefault();
     if (addingToCart) return;
     setAddingToCart(true);
 
+    // ✅ FIXED: Send only the database ID, not the whole object or slug
     addToCart(product);
 
     try {
@@ -53,7 +54,7 @@ const ProductCard = forwardRef(({ product }, ref) => {
 
     setTimeout(() => setAddingToCart(false), 600);
   };
-
+  
   // ✅ Wishlist toggle
   const toggleWishlist = (e) => {
     e.preventDefault();
