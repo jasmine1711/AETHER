@@ -51,7 +51,7 @@ export const PaymentProvider = ({ children }) => {
             product: i._id,
             name: i.name,
             price: i.price,
-            qty: i.qty,
+            quantity: i.qty,
             size: i.size,
             image: i.image,
           })),

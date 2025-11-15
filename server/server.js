@@ -78,7 +78,8 @@ app.use("/api/style", styleRoutes);
 
 
 // ===== Serve Static Images =====
-app.use("/images", express.static(path.join(__dirname, "public", "images")));
+// THIS IS THE FIX
+app.use("/images", express.static(path.join(__dirname, "..", "client", "public", "images")));
 
 // ===== Serve React App in Production =====
 if (process.env.NODE_ENV === "production") {

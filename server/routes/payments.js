@@ -83,6 +83,36 @@ router.post("/razorpay/order", protect, async (req, res) => {
   }
 });
 
+// ----- ✨ NEW: Create COD Order -----
+router.post("/cod/order", protect, async (req, res) => {
+  try {
+    const { items, shipping, subtotal, shippingFee, total } = req.body;
+
+    // Create the order in our database
+    const newOrder = await Order.create({
+    _user: req.user._id,
+      items,
+      shipping,
+      subtotal: Number(subtotal),
+      shippingFee: Number(shippingFee),
+      total: Number(total),
+      paymentProvider: "cod", // Set provider to "cod"
+      paymentStatus: "pending", // Set status to "pending"
+    });
+
+    res.status(201).json({ success: true, order: newOrder });
+  
+  } catch (err) {
+    console.error("COD Order creation error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create COD order",
+      error: err.message,
+    });
+  }
+});
+// ----- END NEW COD ROUTE -----
+
 // ----- Verify Razorpay Payment -----
 router.post("/razorpay/verify", async (req, res) => {
   try {

@@ -29,7 +29,7 @@ export default function ProductDetail() {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products/slug/${slug}`);
+const res = await fetch(`/api/products/slug/${slug}`);
         if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
 
@@ -45,7 +45,9 @@ export default function ProductDetail() {
           );
           const relJson = await relRes.json();
           const relProducts = relJson.products || relJson;
-          setRelatedProducts(relProducts.filter((p) => p._id !== data._id));
+      setRelatedProducts(
+  relProducts.filter((p) => p._id !== data._id && p.slug)
+);
         }
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -71,7 +73,7 @@ export default function ProductDetail() {
     }
 
     const cartItem = {
-      productId: product._id,
+      _id: product._id,
       name: product.name,
       price: Number(product.price) || 0,
       thumbnail: mainMedia || fallbackImage,
@@ -93,15 +95,15 @@ export default function ProductDetail() {
 
     try {
       if (!wishlisted) {
-        await addToWishlist({
-          productId: product._id,
-          name: product.name,
-          thumbnail: mainMedia || fallbackImage,
-          price: Number(product.price) || 0,
-          category: product.category || "Uncategorized",
-          size: selectedSize || "",
-          quantity: quantity || 1,
-        });
+        await addToWishlist({
+          _id: product._id, 
+          name: product.name,
+          thumbnail: mainMedia || fallbackImage,
+          price: Number(product.price) || 0,
+          category: product.category || "Uncategorized",
+          size: selectedSize || "",
+          quantity: quantity || 1,
+        });
         setWishlisted(true);
         try {
           animateImageToCart(imgRef.current, ".icon-wishlist");

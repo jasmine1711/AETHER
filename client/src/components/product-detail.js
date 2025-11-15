@@ -1,4 +1,3 @@
-// public/js/product-detail.js
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const mainImage = document.getElementById('main-product-image');
@@ -44,34 +43,52 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get product ID from URL
-        const pathParts = window.location.pathname.split('/');
-        const productId = pathParts[pathParts.length - 1];
+        // === FIX #1: Get the real ID from the button's data-attribute ===
+        // This 'data-product-id' MUST be on the <button> in your HTML file
+        const realProductId = addToCartBtn.getAttribute('data-product-id');
+
+        if (!realProductId) {
+            console.error('CRITICAL: data-product-id attribute is missing from the button.');
+            showNotification('Error: Product ID not found.', 'error');
+            return;
+        }
         
-        // API call to add to cart
-        fetch('/api/cart/add', {
+        // === FIX #2: Change URL from '/api/cart/add' to '/api/cart' ===
+        fetch('/api/cart', { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                productId: productId,
+                productId: realProductId, // Send the real ID
                 quantity: 1,
                 size: selectedSize
             })
         })
-        .then(response => response.json())
+        .then(response => {
+            // Check if the response was successful
+            if (!response.ok) {
+                // Catch 500 errors
+                return response.json().then(err => { 
+                    throw new Error(err.message || 'Server Error'); 
+                });
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.success) {
+            // Check for 'items' property as a sign of success
+            if (data.items) { 
                 showNotification('Product added to cart successfully!', 'success');
-                updateCartCount(data.cartCount);
+                // You can re-enable this if needed
+                // updateCartCount(data.items.length); 
             } else {
-                showNotification('Error adding product to cart', 'error');
+                showNotification(data.message || 'Error adding product to cart', 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Network error. Please try again.', 'error');
+            // Display the actual error message
+            showNotification(error.message, 'error');
         });
     });
     
@@ -82,7 +99,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Get product ID from URL
+        // === NOTE: This is still sending the slug, not the ID ===
+        // This is okay for now if your /checkout route expects the slug.
+        // But if checkout ALSO needs the ID, you will need to fix this
+        // just like you fixed Add to Cart.
         const pathParts = window.location.pathname.split('/');
         const productId = pathParts[pathParts.length - 1];
         
