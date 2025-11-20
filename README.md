@@ -71,8 +71,9 @@ Follow these steps to run the project on your local machine.
 git clone [https://github.com/jasmine1711/AETHER.git](https://github.com/jasmine1711/AETHER.git)
 cd AETHER
 ```
+---
 
-##📄 License
+## 📄 License
 Distributed under the MIT License. See LICENSE for more information.
 
 Developed with ❤️ by Tanushree Nayal
