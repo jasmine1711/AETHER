@@ -71,7 +71,7 @@ export function AppProvider({ children }) {
     const fetchProducts = async () => {
       dispatch({ type: "SET_LOADING", payload: true });
       try {
-        const { data } = await api.get("/products"); // ✅ cleaner backend call
+        const { data } = await api.get("/api/products"); // ✅ cleaner backend call
         dispatch({ type: "SET_PRODUCTS", payload: data });
       } catch (error) {
         dispatch({ type: "SET_ERROR", payload: error.message });

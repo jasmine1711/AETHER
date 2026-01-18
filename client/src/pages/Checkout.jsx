@@ -15,7 +15,7 @@ export default function Checkout() {
     email: "", phone: "", address: "", city: "", state: "", pincode: "",
   });
 
-  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+  const API_URL = "http://localhost:5000/api";
   const razorpayKey = process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_RCEnwnWpu5qWI7";
 
   // Prefill email if logged in
@@ -47,7 +47,7 @@ export default function Checkout() {
           product: i._id || i.id,
           name: i.name,
           price: i.price,
-          quantity: i.quantity, // ✅ This is correct from our previous fix
+          quantity: i.quantity,
           size: i.size || "",
           image: i.thumbnail || ""
         })),
@@ -57,7 +57,7 @@ export default function Checkout() {
 
       const headers = { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
 
-      const orderRes = await fetch(`${API_URL}/payments/razorpay/order`, {
+   const orderRes = await fetch(`${API_URL}/payments/razorpay/order`, {
         method: "POST",
         headers,
         body: JSON.stringify(orderPayload),

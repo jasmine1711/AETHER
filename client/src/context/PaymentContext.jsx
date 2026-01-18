@@ -36,7 +36,7 @@ export const PaymentProvider = ({ children }) => {
 
     try {
       const token = localStorage.getItem("token");
-      const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+      const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
       const shippingFee = subtotal > 0 ? 99 : 0;
       const total = subtotal + shippingFee;
 
@@ -51,7 +51,7 @@ export const PaymentProvider = ({ children }) => {
             product: i._id,
             name: i.name,
             price: i.price,
-            quantity: i.qty,
+            quantity: i.quantity,
             size: i.size,
             image: i.image,
           })),

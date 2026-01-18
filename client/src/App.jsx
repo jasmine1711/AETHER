@@ -4,7 +4,7 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Hero from "./components/layout/Hero";
 import FeaturedCategory from "./components/layout/FeaturedCategory";
-import Chatbot from "./components/layout/Chatbot";
+
 
 // Auth Pages
 import Signup from "./components/auth/Signup";
@@ -21,7 +21,10 @@ import Checkout from "./pages/Checkout";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Wishlist from "./pages/Wishlist";
-import WardrobePage from './pages/WardrobePage';
+// import Stylist from './pages/Stylist';
+
+// IMPORT THE COMPONENT
+import OutfitSuggestions from './components/OutfitSuggestions'; // Add this import
 
 // Contexts
 import { AuthProvider } from "./context/AuthContext";
@@ -29,7 +32,9 @@ import { PaymentProvider } from "./context/PaymentContext";
 import { CartWishlistProvider } from "./context/CartWishlistContext";
 import { AppProvider } from "./context/AppContext";
 
-import "./App.css"; // Make sure this is imported
+import "./App.css";
+
+import AIAssistant from './components/AIAssistant';
 
 function App() {
   return (
@@ -40,7 +45,6 @@ function App() {
             <Router>
               <div className="App">
                 <Navbar />
-                {/* This <main> tag will hold all your page content and push the footer down */}
                 <main className="main-content">
                   <Routes>
                     {/* Home Page */}
@@ -67,15 +71,25 @@ function App() {
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/wishlist" element={<Wishlist />} />
                     
-                    {/* New: Wardrobe Route (Protected) */}
+                    {/* Wardrobe Route (Protected) */}
                     <Route
                       path="/wardrobe"
                       element={
                         <ProtectedRoute>
-                          <WardrobePage />
+                          <OutfitSuggestions /> 
                         </ProtectedRoute>
                       }
                     />
+                    
+                    {/* Stylist Route (Protected)
+                    <Route
+                      path="/stylist"
+                      element={
+                        <ProtectedRoute>
+                          <Stylist />
+                        </ProtectedRoute>
+                      }
+                    /> */}
 
                     {/* Protected Routes */}
                     <Route
@@ -96,7 +110,7 @@ function App() {
                     />
                   </Routes>
                 </main>
-                <Chatbot /> 
+                <AIAssistant /> {/* Moved to main layout */}
                 <Footer />
               </div>
             </Router>
@@ -106,5 +120,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;
