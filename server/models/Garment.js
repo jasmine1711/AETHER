@@ -1,4 +1,4 @@
-import mongoose from "mongoose"; // Changed from require to import
+import mongoose from "mongoose";
 
 const garmentSchema = new mongoose.Schema(
   {
@@ -43,13 +43,30 @@ const garmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    season: {
+      type: [String],
+      enum: ['Spring', 'Summer', 'Fall', 'Winter'],
+      default: []
+    },
+    formality: {
+      type: String,
+      enum: ['Casual', 'Smart Casual', 'Business Casual', 'Business', 'Formal'],
+      default: 'Casual'
+    },
+    isFavorite: {
+      type: Boolean,
+      default: false
+    }
   },
   {
     timestamps: true,
   }
 );
 
-// This line was missing: You need to create the model from the schema
+// Index for better query performance
+garmentSchema.index({ user: 1, category: 1 });
+garmentSchema.index({ user: 1, style: 1 });
+
 const Garment = mongoose.model("Garment", garmentSchema);
 
-export default Garment; // Now this line correctly exports the model
+export default Garment;

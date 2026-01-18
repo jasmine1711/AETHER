@@ -90,7 +90,7 @@ router.post("/cod/order", protect, async (req, res) => {
 
     // Create the order in our database
     const newOrder = await Order.create({
-    _user: req.user._id,
+    user: req.user._id,
       items,
       shipping,
       subtotal: Number(subtotal),
