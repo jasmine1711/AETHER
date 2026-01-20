@@ -40,7 +40,7 @@ import productRoutes from "./routes/products.js";
 import wishlistRoutes from "./routes/wishlist.js";
 import contactRoutes from "./routes/contact.js";
 import reviewRoutes from "./routes/reviews.js";
-import styleRoutes from "./routes/style.js";
+// import styleRoutes from "./routes/style.js";
 import userRoutes from './routes/users.js';
 
 const app = express();
@@ -76,7 +76,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/reviews", reviewRoutes);
-app.use("/api/style", styleRoutes);
+// app.use("/api/style", styleRoutes);
 app.use('/api/users', userRoutes);
 
 
