@@ -46,14 +46,27 @@ import userRoutes from './routes/users.js';
 const app = express();
 
 // ===== Middleware =====
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://velvety-basbousa-666b8c.netlify.app"
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
