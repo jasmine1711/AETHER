@@ -57,7 +57,7 @@ export default function Checkout() {
 
       const headers = { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
 
-   const orderRes = await fetch(`${API_URL}/payments/razorpay/order`, {
+  const orderRes = await fetch(`${API_URL}/pay/init-order`, {
         method: "POST",
         headers,
         body: JSON.stringify(orderPayload),
@@ -82,7 +82,7 @@ export default function Checkout() {
         modal: { ondismiss: () => setLoading(false) },
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(`${API_URL}/payments/razorpay/verify`, {
+            const verifyRes = await fetch(`${API_URL}/pay/verify`, {
               method: "POST",
               headers,
               body: JSON.stringify({
@@ -148,7 +148,7 @@ export default function Checkout() {
       const headers = { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
 
       // Note the NEW URL: /cod/order
-      const codRes = await fetch(`${API_URL}/payments/cod/order`, {
+     const codRes = await fetch(`${API_URL}/cod/order`, {
         method: "POST",
         headers,
         body: JSON.stringify(orderPayload),

@@ -84,12 +84,11 @@ mongoose
 // ===== API Routes =====
 app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/payments", paymentRoutes);
+app.use("/api", paymentRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/reviews", reviewRoutes);
-// app.use("/api/style", styleRoutes);
 app.use('/api/users', userRoutes);
 
 

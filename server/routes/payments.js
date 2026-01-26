@@ -37,7 +37,7 @@ router.get("/test", (req, res) => {
 });
 
 // ----- Create Razorpay Order -----
-router.post("/razorpay/order", protect, async (req, res) => {
+router.post("/pay/init-order", protect, async (req, res) => {
   try {
     const rzp = getRazorpay();
     if (!rzp) return res.status(500).json({ success: false, message: "Payment gateway not configured" });
@@ -114,7 +114,7 @@ router.post("/cod/order", protect, async (req, res) => {
 // ----- END NEW COD ROUTE -----
 
 // ----- Verify Razorpay Payment -----
-router.post("/razorpay/verify", async (req, res) => {
+router.post("/pay/verify", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, dbOrderId } = req.body;
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !dbOrderId) {
