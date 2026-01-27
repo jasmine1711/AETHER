@@ -15,7 +15,8 @@ export default function Checkout() {
     email: "", phone: "", address: "", city: "", state: "", pincode: "",
   });
 
-  const API_URL = "http://localhost:5000/api";
+ const API_URL = process.env.REACT_APP_API_URL;
+
   const razorpayKey = process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_RCEnwnWpu5qWI7";
 
   // Prefill email if logged in
