@@ -5,7 +5,7 @@
 ![AI Integration](https://img.shields.io/badge/AI-Integrated-FF4081?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Deployed-success?style=for-the-badge)
 
-> **AETHER** is a full-stack e-commerce application that blends vintage and pop-culture fashion with modern AI technology. It features a dynamic shopping experience with an integrated AI stylist that provides personalized outfit recommendations based on body type and style preferences.
+> **AETHER** is a high-performance, full-stack digital wardrobe system engineered via the MERN stack (MongoDB, Express.js, React, Node.js) to reclaim the lost art of intentional fashion. While modern "Gen Z" trends often prioritize fleeting virality and sensationalism over craftsmanship, AETHER draws inspiration from the structural creativity and bold pop-palettes of 90s vintage style, focusing on the "idea" behind an outfit rather than the noise of social media. Technically, the platform functions as a Personal ERP, utilizing a RESTful architecture protected by enterprise-grade security, including bcrypt credential encryption and JWT-based session management with Role-Based Access Control. Its core innovation is an AI-driven intelligence layer featuring a specialized wardrobe assistant and chatbot that rejects generic trends for personalized logic. By analyzing individual body shapes and specific event contexts, the AI provides sophisticated, data-backed styling recommendations that maximize a user's existing collection. This project is a definitive showcase of secure application design, scalable API integration, and the use of intelligent automation to replace mindless consumption with thoughtful, creative expression.
 
 ---
 
