@@ -7,7 +7,7 @@ import morgan from "morgan";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import listEndpoints from "express-list-endpoints";
-
+import fs from 'fs';
 dotenv.config();
 
 // ===== Directory Helpers =====
@@ -107,10 +107,10 @@ const imagesPath = path.join(__dirname, "..", "client", "public", "images");
 const altImagesPath = path.join(__dirname, "public", "images");
 
 // Try primary path first
-if (require('fs').existsSync(imagesPath)) {
+if (fs.existsSync(imagesPath)) {
   app.use("/images", express.static(imagesPath));
   console.log(`✅ Serving images from: ${imagesPath}`);
-} else if (require('fs').existsSync(altImagesPath)) {
+} else if (fs.existsSync(altImagesPath)) {
   app.use("/images", express.static(altImagesPath));
   console.log(`✅ Serving images from: ${altImagesPath}`);
 } else {
