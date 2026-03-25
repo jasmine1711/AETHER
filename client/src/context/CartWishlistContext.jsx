@@ -48,7 +48,7 @@ export function CartWishlistProvider({ children }) {
     if (!token) return;
     setLoading(true);
     try {
-      const { data } = await authApi.get("/api/cart");
+      const { data } = await authApi.get("/cart");
       if (data?.items) {
         const flattenedItems = data.items.map((item) =>
           !item.product
@@ -84,7 +84,7 @@ export function CartWishlistProvider({ children }) {
   const fetchWishlist = useCallback(async () => {
     if (!token) return;
     try {
-      const { data } = await authApi.get("/api/wishlist");
+      const { data } = await authApi.get("/wishlist");
       if (data?.products) {
         setWishlist(data.products.map(normalizeItem));
       } else {
@@ -177,7 +177,7 @@ export function CartWishlistProvider({ children }) {
 
       // 2. Server Request
       try {
-        const { data } = await authApi.post("/api/cart", payload);
+        const { data } = await authApi.post("/cart", payload);
         if (data?.items) {
           const flattenedItems = data.items.map((item) => ({
             ...item.product,
@@ -202,7 +202,7 @@ export function CartWishlistProvider({ children }) {
       }
       try {
         setCart((prev) => prev.filter((p) => p.cartItemId !== cartItemId));
-        await authApi.delete(`/api/cart/item/${cartItemId}`);
+        await authApi.delete(`/cart/item/${cartItemId}`);
       } catch (err) {
         handleError(err, "Failed to remove item.");
         fetchCart(); // rollback on failure
@@ -229,7 +229,7 @@ export function CartWishlistProvider({ children }) {
             p.cartItemId === cartItemId ? { ...p, quantity } : p
           )
         );
-        await authApi.put(`/api/cart/item/${cartItemId}`, { quantity });
+        await authApi.put(`/cart/item/${cartItemId}`, { quantity });
       } catch (err) {
         handleError(err, "Failed to update quantity.");
         fetchCart(); // rollback on failure
@@ -241,7 +241,7 @@ export function CartWishlistProvider({ children }) {
   const clearCart = useCallback(async () => {
     if (token) {
       try {
-        await authApi.delete("/api/cart");
+        await authApi.delete("/cart");
       } catch (err) {
         handleError(err, "Failed to clear cart.");
       }
@@ -281,7 +281,7 @@ export function CartWishlistProvider({ children }) {
 
       // 2. Server Request
       try {
-        const { data } = await authApi.post(`/api/wishlist/${payloadId}`);
+        const { data } = await authApi.post(`/wishlist/${payloadId}`);
         if (data?.products) {
           setWishlist(data.products.map(normalizeItem));
         }
@@ -300,7 +300,7 @@ export function CartWishlistProvider({ children }) {
       }
       try {
         setWishlist((prev) => prev.filter((p) => p._id !== productId));
-        await authApi.delete(`/api/wishlist/${productId}`);
+        await authApi.delete(`/wishlist/${productId}`);
       } catch (err) {
         handleError(err, "Failed to remove from wishlist.");
         fetchWishlist(); // rollback on failure

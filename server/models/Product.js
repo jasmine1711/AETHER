@@ -23,17 +23,18 @@ const productSchema = new mongoose.Schema(
       type: String,
       unique: true,
       index: true,
+      sparse: true, // Allow missing slugs but maintain uniqueness
     },
     category: {
       type: String,
       required: [true, "Category is required"],
       enum: [
         "Leather Jackets",
-        "Y2K Tops",
+        "Y2K Tops", 
         "Corset Tops",
         "Denim Jeans",
         "Handbags",
-        "Faux Leather",
+        "Faux Leather"
       ],
       index: true,
     },
@@ -60,12 +61,12 @@ const productSchema = new mongoose.Schema(
     images: {
       type: [String],
       required: true,
-      default: ["/images/default.jpg"], // ✅ fallback so frontend always gets an array
+      default: ["/images/default.jpg"],
     },
     thumbnail: {
       type: String,
       required: true,
-      default: "/images/default-thumb.jpg", // ✅ fallback
+      default: "/images/default-thumb.jpg",
     },
 
     /* ---------------- Description & Sizes ---------------- */
@@ -77,8 +78,9 @@ const productSchema = new mongoose.Schema(
     sizes: {
       type: [String],
       required: true,
-      enum: ["XS", "S", "M", "L", "XL", "XXL", "One Size"],
-      default: ["One Size"], // ✅ ensures array always exists
+      // ✅ FIX: Removed enum validation to accept both letter and numeric sizes
+      // This allows sizes like: "XS", "S", "M", "L", "XL", "XXL", "One Size", "28", "30", "32", etc.
+      default: ["One Size"],
     },
 
     stock: {
@@ -111,14 +113,21 @@ const productSchema = new mongoose.Schema(
 /* ---------------- Indexes ---------------- */
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ name: "text", description: "text" });
+productSchema.index({ slug: 1 }); // Add index for slug lookups
 
 /* ---------------- Slug Middleware ---------------- */
 productSchema.pre("save", async function (next) {
-  if (this.isModified("name")) {
-    let baseSlug = slugify(this.name, { lower: true, strict: true });
+  // Generate slug if name is modified or slug doesn't exist
+  if (this.isModified("name") || !this.slug) {
+    let baseSlug = slugify(this.name, { 
+      lower: true, 
+      strict: true,
+      remove: /[*+~.()'"!:@]/g 
+    });
     let slug = baseSlug;
     let counter = 1;
 
+    // Check if slug already exists
     while (await this.constructor.findOne({ slug, _id: { $ne: this._id } })) {
       slug = `${baseSlug}-${counter++}`;
     }
@@ -137,7 +146,7 @@ productSchema.statics.findByCategory = function (category, excludeId = null) {
   const query = excludeId
     ? { category, _id: { $ne: excludeId } }
     : { category };
-  return this.find(query).limit(10); // ✅ safe default
+  return this.find(query).limit(10);
 };
 
 productSchema.methods.isInStock = function () {

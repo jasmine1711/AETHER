@@ -1,5 +1,6 @@
 // src/context/PaymentContext.jsx
 import { createContext, useContext, useState, useCallback } from "react";
+import api from "../utils/api";  // ✅ Import your configured api instance
 
 const PaymentContext = createContext();
 
@@ -15,9 +16,8 @@ export const PaymentProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5000/api/payments/test");
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
+      // ✅ Use api instance instead of fetch
+      const { data } = await api.get("/payments/test");
       console.log("✅ Payment API Response:", data);
       return { success: true, data };
     } catch (err) {
@@ -35,39 +35,26 @@ export const PaymentProvider = ({ children }) => {
     setError(null);
 
     try {
-      const token = localStorage.getItem("token");
       const subtotal = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
       const shippingFee = subtotal > 0 ? 99 : 0;
       const total = subtotal + shippingFee;
 
-      const res = await fetch("http://localhost:5000/api/payments/razorpay/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-        body: JSON.stringify({
-          items: cart.map((i) => ({
-            product: i._id,
-            name: i.name,
-            price: i.price,
-            quantity: i.quantity,
-            size: i.size,
-            image: i.image,
-          })),
-          shipping: shippingInfo,
-          subtotal,
-          shippingFee,
-          total,
-        }),
+      // ✅ Use api instance
+      const { data } = await api.post("/payments/razorpay/order", {
+        items: cart.map((i) => ({
+          product: i._id,
+          name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+          size: i.size,
+          image: i.image,
+        })),
+        shipping: shippingInfo,
+        subtotal,
+        shippingFee,
+        total,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create Razorpay order");
-      }
-
-      const data = await res.json();
       setPaymentIntent(data);
       return { success: true, data };
     } catch (err) {
@@ -85,22 +72,12 @@ export const PaymentProvider = ({ children }) => {
     setError(null);
 
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/payments/razorpay/verify", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-        body: JSON.stringify({ ...razorpayData, orderId }),
+      // ✅ Use api instance
+      const { data } = await api.post("/payments/razorpay/verify", {
+        ...razorpayData,
+        orderId,
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || `HTTP error! status: ${res.status}`);
-      }
-
-      const data = await res.json();
       setPaymentIntent(null);
       return { success: true, data };
     } catch (err) {
@@ -112,16 +89,13 @@ export const PaymentProvider = ({ children }) => {
     }
   };
 
-  // Fetch payment methods (optional for Razorpay)
+  // Fetch payment methods
   const getPaymentMethods = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5000/api/payments/methods", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
+      // ✅ Use api instance
+      const { data } = await api.get("/payments/methods");
       return { success: true, data };
     } catch (err) {
       console.error("❌ Get Payment Methods Error:", err);
@@ -132,16 +106,13 @@ export const PaymentProvider = ({ children }) => {
     }
   };
 
-  // Get payment history (user orders)
+  // Get payment history
   const getPaymentHistory = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5000/api/payments/my-orders", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
+      // ✅ Use api instance
+      const { data } = await api.get("/payments/my-orders");
       return { success: true, data };
     } catch (err) {
       console.error("❌ Get Payment History Error:", err);
@@ -152,7 +123,7 @@ export const PaymentProvider = ({ children }) => {
     }
   };
 
-  // --- Utility Functions ---
+  // Utility functions (no changes needed)
   const formatCurrency = (amount, currency = "INR") =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency }).format(amount);
 

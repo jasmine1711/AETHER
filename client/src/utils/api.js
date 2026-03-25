@@ -1,10 +1,10 @@
-// src/utils/api.js
 import axios from "axios";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+// ✅ FIX: Remove /api from base URL since all endpoints already include it
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: API_BASE,  // Now it's just the domain, no /api
   headers: {
     "Content-Type": "application/json",
   },

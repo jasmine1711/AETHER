@@ -58,11 +58,12 @@ export default function Checkout() {
 
       const headers = { "Content-Type": "application/json", ...(token && { Authorization: `Bearer ${token}` }) };
 
-  const orderRes = await fetch(`${API_URL}/pay/init-order`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(orderPayload),
-      });
+  // ✅ This is correct - it uses API_URL
+const orderRes = await fetch(`${API_URL}/pay/init-order`, {
+  method: "POST",
+  headers,
+  body: JSON.stringify(orderPayload),
+});
 
       if (!orderRes.ok) {
         const errorData = await orderRes.json().catch(() => ({}));

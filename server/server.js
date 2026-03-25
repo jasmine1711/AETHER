@@ -8,7 +8,6 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import listEndpoints from "express-list-endpoints";
 
-
 dotenv.config();
 
 // ===== Directory Helpers =====
@@ -40,15 +39,16 @@ import productRoutes from "./routes/products.js";
 import wishlistRoutes from "./routes/wishlist.js";
 import contactRoutes from "./routes/contact.js";
 import reviewRoutes from "./routes/reviews.js";
-// import styleRoutes from "./routes/style.js";
 import userRoutes from './routes/users.js';
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
 // ===== Middleware =====
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://velvety-basbousa-666b8c.netlify.app"
+  "https://velvety-basbousa-666b8c.netlify.app",
+  "https://aether-backend-7uwv.onrender.com" // ✅ Add backend URL for self-reference
 ];
 
 app.use(
@@ -58,6 +58,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`⚠️ CORS blocked request from: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -66,7 +67,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
@@ -90,27 +90,62 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use('/api/users', userRoutes);
+app.use("/api/ai", aiRoutes);
 
+// ===== Health Check Endpoint (for Render) =====
+app.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "OK", 
+    timestamp: new Date().toISOString(),
+    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected"
+  });
+});
 
 // ===== Serve Static Images =====
-// THIS IS THE FIX
-app.use("/images", express.static(path.join(__dirname, "..", "client", "public", "images")));
+// ✅ FIX: More robust static file serving with fallbacks
+const imagesPath = path.join(__dirname, "..", "client", "public", "images");
+const altImagesPath = path.join(__dirname, "public", "images");
+
+// Try primary path first
+if (require('fs').existsSync(imagesPath)) {
+  app.use("/images", express.static(imagesPath));
+  console.log(`✅ Serving images from: ${imagesPath}`);
+} else if (require('fs').existsSync(altImagesPath)) {
+  app.use("/images", express.static(altImagesPath));
+  console.log(`✅ Serving images from: ${altImagesPath}`);
+} else {
+  console.warn("⚠️ No images directory found. Creating fallback...");
+  app.use("/images", (req, res) => {
+    res.status(404).json({ error: "Image not found" });
+  });
+}
 
 // ===== Serve React App in Production =====
 if (process.env.NODE_ENV === "production") {
-  // Serve static files from build folder
-  app.use(express.static(path.join(__dirname, "..", "client", "build")));
-
-  // Fallback for React Router
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(__dirname, "..", "client", "build", "index.html"));
-  });
+  const buildPath = path.join(__dirname, "..", "client", "build");
+  
+  // Check if build exists
+  if (require('fs').existsSync(buildPath)) {
+    app.use(express.static(buildPath));
+    console.log(`✅ Serving React app from: ${buildPath}`);
+    
+    // Fallback for React Router
+    app.get("/*", (req, res) => {
+      res.sendFile(path.join(buildPath, "index.html"));
+    });
+  } else {
+    console.warn(`⚠️ Build folder not found at: ${buildPath}`);
+  }
 }
 
 // ===== 404 Handler (only for API routes) =====
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith("/api")) {
-    return res.status(404).json({ message: "Route not found" });
+    return res.status(404).json({ 
+      success: false,
+      message: "Route not found",
+      requestedUrl: req.originalUrl 
+    });
   }
   next();
 });
@@ -119,10 +154,10 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error("💥 Error:", err.stack);
   res.status(err.statusCode || 500).json({
-    message:
-      process.env.NODE_ENV === "production"
-        ? "Something went wrong!"
-        : err.message,
+    success: false,
+    message: process.env.NODE_ENV === "production"
+      ? "Something went wrong!"
+      : err.message,
   });
 });
 
@@ -131,25 +166,29 @@ const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || "0.0.0.0";
 
 app.listen(PORT, HOST, () => {
-  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
-
+  console.log(`\n🚀 Server running on http://${HOST}:${PORT}`);
+  console.log(`📡 Environment: ${process.env.NODE_ENV || "development"}`);
+  
   // Razorpay Status
   if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
     console.log("✅ Razorpay is configured");
   } else {
     console.log("⚠️ Razorpay keys missing! Payment routes may not work.");
   }
-
+  
   // Gemini AI Status
   if (process.env.GEMINI_API_KEY) {
     console.log("✅ Gemini AI is configured");
   } else {
-    console.log("⚠️ Gemini AI key missing!");
+    console.log("⚠️ Gemini AI key missing! AI features may not work.");
   }
 });
 
 // ===== Debug: List all registered routes =====
-console.log("📌 Registered Routes:");
-console.table(listEndpoints(app));
+console.log("\n📌 Registered Routes:");
+const endpoints = listEndpoints(app);
+// Filter to show only API routes for cleaner output
+const apiEndpoints = endpoints.filter(e => e.path.startsWith('/api'));
+console.table(apiEndpoints);
 
 export default app;

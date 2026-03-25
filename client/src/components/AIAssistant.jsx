@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import './AIAssistant.css';
+import api from '../utils/api'; 
 
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,13 +57,9 @@ const AIAssistant = () => {
     setIsTyping(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/ai/chat', {
-        message: text
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
+      const response = await api.post('/ai/chat', {
+  message: text
+});
 
       const aiMessage = {
         id: Date.now() + 1,
