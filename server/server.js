@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import listEndpoints from "express-list-endpoints";
 import fs from 'fs';
+
 dotenv.config();
 
 // ===== Directory Helpers =====
@@ -48,13 +49,12 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://velvety-basbousa-666b8c.netlify.app",
-  "https://aether-backend-7uwv.onrender.com" // ✅ Add backend URL for self-reference
+  "https://aether-backend-7uwv.onrender.com"
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -102,11 +102,9 @@ app.get("/health", (req, res) => {
 });
 
 // ===== Serve Static Images =====
-// ✅ FIX: More robust static file serving with fallbacks
 const imagesPath = path.join(__dirname, "..", "client", "public", "images");
 const altImagesPath = path.join(__dirname, "public", "images");
 
-// Try primary path first
 if (fs.existsSync(imagesPath)) {
   app.use("/images", express.static(imagesPath));
   console.log(`✅ Serving images from: ${imagesPath}`);
@@ -114,7 +112,7 @@ if (fs.existsSync(imagesPath)) {
   app.use("/images", express.static(altImagesPath));
   console.log(`✅ Serving images from: ${altImagesPath}`);
 } else {
-  console.warn("⚠️ No images directory found. Creating fallback...");
+  console.warn("⚠️ No images directory found. Images will not be served.");
   app.use("/images", (req, res) => {
     res.status(404).json({ error: "Image not found" });
   });
@@ -124,8 +122,8 @@ if (fs.existsSync(imagesPath)) {
 if (process.env.NODE_ENV === "production") {
   const buildPath = path.join(__dirname, "..", "client", "build");
   
-  // Check if build exists
-  if (require('fs').existsSync(buildPath)) {
+  // ✅ FIXED: Use fs.existsSync instead of require('fs').existsSync
+  if (fs.existsSync(buildPath)) {
     app.use(express.static(buildPath));
     console.log(`✅ Serving React app from: ${buildPath}`);
     
@@ -187,7 +185,6 @@ app.listen(PORT, HOST, () => {
 // ===== Debug: List all registered routes =====
 console.log("\n📌 Registered Routes:");
 const endpoints = listEndpoints(app);
-// Filter to show only API routes for cleaner output
 const apiEndpoints = endpoints.filter(e => e.path.startsWith('/api'));
 console.table(apiEndpoints);
 
