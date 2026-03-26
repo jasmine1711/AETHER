@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       unique: true,
       // ✅ REMOVED: index: true - we'll use schema.index() below instead
-      sparse: true, // Allow missing slugs but maintain uniqueness
+      sparse: true,
     },
     category: {
       type: String,
@@ -78,7 +78,6 @@ const productSchema = new mongoose.Schema(
     sizes: {
       type: [String],
       required: true,
-      // ✅ Allows both letter and numeric sizes
       default: ["One Size"],
     },
 
@@ -110,9 +109,11 @@ const productSchema = new mongoose.Schema(
 );
 
 /* ---------------- Indexes ---------------- */
+// ✅ Keep only these indexes - NO duplicate slug index
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ name: "text", description: "text" });
-productSchema.index({ slug: 1 }); // ✅ Single index definition for slug
+// ✅ Single slug index definition
+productSchema.index({ slug: 1 });
 
 /* ---------------- Slug Middleware ---------------- */
 productSchema.pre("save", async function (next) {
@@ -153,7 +154,6 @@ productSchema.methods.isInStock = function () {
 };
 
 /* ---------------- Hooks for reviews ---------------- */
-// Keep rating & numReviews in sync automatically
 productSchema.post("save", async function (doc, next) {
   if (doc.reviews?.length > 0) {
     doc.numReviews = doc.reviews.length;
