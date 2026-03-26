@@ -7,6 +7,17 @@ import api from "../utils/api";
 
 const defaultImage = "/images/default.jpg";
 
+// ✅ Category slug to display name mapping
+const categoryMap = {
+  "leather-jackets": "Leather Jackets",
+  "y2k-tops": "Y2K Tops",
+  "corset-tops": "Corset Tops",
+  "denim-jeans": "Denim Jeans",
+  "handbags": "Handbags",
+  "faux-leather": "Faux Leather",
+  "faux-leather-jackets": "Faux Leather"
+};
+
 function AnimatedProductCard({ product }) {
   const [ref, isInView] = useInView();
 
@@ -28,21 +39,38 @@ export default function Products() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    let isMounted = true; // ✅ Prevent state updates after unmount
+    let isMounted = true;
     
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
       try {
-        const categoryParam = searchParams.get("category") || "";
+        const categorySlug = searchParams.get("category") || "";
+        
+        // ✅ Convert category slug to the format backend expects
+        let categoryParam = "";
+        if (categorySlug && categoryMap[categorySlug]) {
+          categoryParam = categoryMap[categorySlug];
+          console.log(`🔄 Converting category: ${categorySlug} → ${categoryParam}`);
+        } else if (categorySlug) {
+          // If no mapping found, try to format it (e.g., "faux-leather" → "Faux Leather")
+          categoryParam = categorySlug
+            .split("-")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+          console.log(`🔄 Formatted category: ${categorySlug} → ${categoryParam}`);
+        }
+        
+        // Build URL - use category display name, not slug
         let url = "/api/products?limit=100";
         if (categoryParam) {
           url = `/api/products?category=${encodeURIComponent(categoryParam)}&limit=100`;
         }
         
+        console.log(`📡 Fetching: ${url}`);
         const response = await api.get(url);
         
-        if (!isMounted) return; // ✅ Don't update if component unmounted
+        if (!isMounted) return;
         
         let productsList = [];
         
@@ -82,7 +110,7 @@ export default function Products() {
     fetchProducts();
     
     return () => {
-      isMounted = false; // ✅ Cleanup
+      isMounted = false;
     };
   }, [searchParams]);
 
@@ -109,7 +137,7 @@ export default function Products() {
   if (!allProducts.length) {
     return (
       <div className="products-loading">
-        <p>No products found.</p>
+        <p>No products found in this category.</p>
         <Link to="/products" className="btn-primary">View All Products</Link>
       </div>
     );
