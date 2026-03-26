@@ -22,7 +22,7 @@ const productSchema = new mongoose.Schema(
     slug: {
       type: String,
       unique: true,
-      index: true,
+      // ✅ REMOVED: index: true - we'll use schema.index() below instead
       sparse: true, // Allow missing slugs but maintain uniqueness
     },
     category: {
@@ -78,8 +78,7 @@ const productSchema = new mongoose.Schema(
     sizes: {
       type: [String],
       required: true,
-      // ✅ FIX: Removed enum validation to accept both letter and numeric sizes
-      // This allows sizes like: "XS", "S", "M", "L", "XL", "XXL", "One Size", "28", "30", "32", etc.
+      // ✅ Allows both letter and numeric sizes
       default: ["One Size"],
     },
 
@@ -113,7 +112,7 @@ const productSchema = new mongoose.Schema(
 /* ---------------- Indexes ---------------- */
 productSchema.index({ category: 1, price: 1 });
 productSchema.index({ name: "text", description: "text" });
-productSchema.index({ slug: 1 }); // Add index for slug lookups
+productSchema.index({ slug: 1 }); // ✅ Single index definition for slug
 
 /* ---------------- Slug Middleware ---------------- */
 productSchema.pre("save", async function (next) {

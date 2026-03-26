@@ -40,15 +40,29 @@ export default function Products() {
           ? `/api/products?category=${encodeURIComponent(categoryParam)}`
           : "/api/products";
         
-        const { data } = await api.get(url);
-
-        // Handle different response structures
-        const productsList = data.products || data;
+        const response = await api.get(url);
+        
+        // ✅ FIX: Handle different response structures correctly
+        let productsList = [];
+        
+        if (response.data && Array.isArray(response.data)) {
+          // If response is direct array
+          productsList = response.data;
+        } else if (response.data && response.data.products && Array.isArray(response.data.products)) {
+          // If response has products property
+          productsList = response.data.products;
+        } else if (Array.isArray(response.data)) {
+          productsList = response.data;
+        } else {
+          console.error("Unexpected response structure:", response.data);
+          productsList = [];
+        }
         
         // Ensure each product has required fields
         const productsWithFallback = productsList.map((p) => ({
           ...p,
           _id: p._id || p.id,
+          slug: p.slug || p.name?.toLowerCase().replace(/\s+/g, '-'),
           thumbnail: p.thumbnail || p.images?.[0] || defaultImage,
           images: p.images?.length ? p.images : [defaultImage],
         }));
