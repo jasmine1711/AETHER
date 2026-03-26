@@ -7,9 +7,6 @@ import api from "../utils/api";
 
 const defaultImage = "/images/default.jpg";
 
-// Convert text to slug
-const slugify = (text = "") => text.toLowerCase().trim().replace(/\s+/g, "-");
-
 function AnimatedProductCard({ product }) {
   const [ref, isInView] = useInView();
 
@@ -35,21 +32,19 @@ export default function Products() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        // ✅ Fetch from backend API
+        // ✅ Use api instance with correct endpoint (no double /api)
         const url = categoryParam 
           ? `/api/products?category=${encodeURIComponent(categoryParam)}`
           : "/api/products";
         
         const response = await api.get(url);
         
-        // ✅ FIX: Handle different response structures correctly
+        // ✅ Handle response structure
         let productsList = [];
         
         if (response.data && Array.isArray(response.data)) {
-          // If response is direct array
           productsList = response.data;
         } else if (response.data && response.data.products && Array.isArray(response.data.products)) {
-          // If response has products property
           productsList = response.data.products;
         } else if (Array.isArray(response.data)) {
           productsList = response.data;
