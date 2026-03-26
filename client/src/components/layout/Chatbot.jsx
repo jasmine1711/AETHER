@@ -17,25 +17,24 @@ const Chatbot = () => {
 
         const userMessage = { from: 'user', text: inputValue };
         setMessages(prev => [...prev, userMessage]);
-        const currentMessage = inputValue; // Store message before clearing
+        const currentMessage = inputValue;
         setInputValue('');
         setIsLoading(true);
 
         try {
-            // ✅ Real API call to Gemini AI endpoint
-            const response = await api.post('/ai/chat', {
+            // ✅ Fixed: Use correct endpoint with /api prefix
+            const response = await api.post('/api/ai/chat', {
                 message: currentMessage
             });
 
             const botResponse = { 
                 from: 'bot', 
-                text: response.data.reply || "Thanks for your message! I'm here to help with fashion advice." 
+                text: response.data.reply || response.data.response || "Thanks for your message! I'm here to help with fashion advice." 
             };
             setMessages(prev => [...prev, botResponse]);
         } catch (error) {
             console.error('Chatbot API error:', error);
             
-            // Fallback responses based on error type
             let errorText = "Sorry, I'm having trouble connecting right now. ";
             
             if (error.response?.status === 401) {

@@ -6,8 +6,9 @@ import ProductCard from "../components/product/ProductCard";
 import { FaHeart } from "react-icons/fa";
 import "./ProductDetail.css";
 import { animateImageToCart } from "../utils/animateToCart";
+import api from "../utils/api"; // ✅ Import the configured API client
 
-const fallbackImage = "/images/default.jpg"; // ✅ use from public folder
+const fallbackImage = "/images/default.jpg";
 
 export default function ProductDetail() {
   const { id: slug } = useParams();
@@ -29,10 +30,9 @@ export default function ProductDetail() {
   useEffect(() => {
     async function fetchProduct() {
       try {
-const res = await fetch(`/api/products/slug/${slug}`);
-        if (!res.ok) throw new Error("Failed to fetch product");
-        const data = await res.json();
-
+        // ✅ FIX: Use api instance instead of fetch with relative path
+        const { data } = await api.get(`/api/products/slug/${slug}`);
+        
         setProduct(data);
         setSelectedSize(data.sizes?.[0] || "");
         setMainMedia(data.images?.[0] || data.thumbnail || fallbackImage);
@@ -40,14 +40,11 @@ const res = await fetch(`/api/products/slug/${slug}`);
 
         // Fetch related products
         if (data.category) {
-          const relRes = await fetch(
-            `/api/products?category=${encodeURIComponent(data.category)}`
+          const relRes = await api.get(`/api/products?category=${encodeURIComponent(data.category)}`);
+          const relProducts = relRes.data.products || relRes.data;
+          setRelatedProducts(
+            relProducts.filter((p) => p._id !== data._id && p.slug)
           );
-          const relJson = await relRes.json();
-          const relProducts = relJson.products || relJson;
-      setRelatedProducts(
-  relProducts.filter((p) => p._id !== data._id && p.slug)
-);
         }
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -95,15 +92,15 @@ const res = await fetch(`/api/products/slug/${slug}`);
 
     try {
       if (!wishlisted) {
-        await addToWishlist({
-          _id: product._id, 
-          name: product.name,
-          thumbnail: mainMedia || fallbackImage,
-          price: Number(product.price) || 0,
-          category: product.category || "Uncategorized",
-          size: selectedSize || "",
-          quantity: quantity || 1,
-        });
+        await addToWishlist({
+          _id: product._id, 
+          name: product.name,
+          thumbnail: mainMedia || fallbackImage,
+          price: Number(product.price) || 0,
+          category: product.category || "Uncategorized",
+          size: selectedSize || "",
+          quantity: quantity || 1,
+        });
         setWishlisted(true);
         try {
           animateImageToCart(imgRef.current, ".icon-wishlist");
