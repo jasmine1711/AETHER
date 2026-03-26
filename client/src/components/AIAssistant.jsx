@@ -1,6 +1,5 @@
 // src/components/AIAssistant.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import './AIAssistant.css';
 import api from '../utils/api'; 
 
@@ -57,13 +56,14 @@ const AIAssistant = () => {
     setIsTyping(true);
 
     try {
-      const response = await api.post('/ai/chat', {
-  message: text
-});
+      // ✅ FIX: Add /api prefix
+      const response = await api.post('/api/ai/chat', {
+        message: text
+      });
 
       const aiMessage = {
         id: Date.now() + 1,
-        text: response.data.reply || "I'm here to help with fashion advice!",
+        text: response.data.reply || response.data.response || "I'm here to help with fashion advice!",
         isUser: false
       };
       
