@@ -48,7 +48,8 @@ export function CartWishlistProvider({ children }) {
     if (!token) return;
     setLoading(true);
     try {
-      const { data } = await authApi.get("/cart");
+      // ✅ FIX: Add /api prefix
+      const { data } = await authApi.get("/api/cart");
       if (data?.items) {
         const flattenedItems = data.items.map((item) =>
           !item.product
@@ -84,7 +85,8 @@ export function CartWishlistProvider({ children }) {
   const fetchWishlist = useCallback(async () => {
     if (!token) return;
     try {
-      const { data } = await authApi.get("/wishlist");
+      // ✅ FIX: Add /api prefix
+      const { data } = await authApi.get("/api/wishlist");
       if (data?.products) {
         setWishlist(data.products.map(normalizeItem));
       } else {
@@ -136,7 +138,6 @@ export function CartWishlistProvider({ children }) {
  // ================== CART ==================
   const addToCart = useCallback(
     async (item) => {
-      // 🔍 DEBUG: If item is a string (ID) instead of object, warn the developer
       if (typeof item === "string") {
         console.error(" ERROR: addToCart expects a full Product Object, but received a String ID:", item);
         console.warn(" Fix: Call addToCart(product) instead of addToCart(product._id)");
@@ -145,7 +146,6 @@ export function CartWishlistProvider({ children }) {
 
       const normalized = normalizeItem(item);
       
-      // 🛡️ SAFETY CHECK: Ensure we actually have a Product ID
       if (!normalized._id) {
         console.error(" ERROR: Item is missing '_id'. cannot add to cart.", item);
         return;
@@ -157,7 +157,6 @@ export function CartWishlistProvider({ children }) {
         size: normalized.size,
       };
 
-      // 1. Optimistic UI Update (Immediate feedback for user)
       if (!token) {
         setCart((prev) => {
           const idx = prev.findIndex(
@@ -175,9 +174,9 @@ export function CartWishlistProvider({ children }) {
         return;
       }
 
-      // 2. Server Request
       try {
-        const { data } = await authApi.post("/cart", payload);
+        // ✅ FIX: Add /api prefix
+        const { data } = await authApi.post("/api/cart", payload);
         if (data?.items) {
           const flattenedItems = data.items.map((item) => ({
             ...item.product,
@@ -202,10 +201,11 @@ export function CartWishlistProvider({ children }) {
       }
       try {
         setCart((prev) => prev.filter((p) => p.cartItemId !== cartItemId));
-        await authApi.delete(`/cart/item/${cartItemId}`);
+        // ✅ FIX: Add /api prefix
+        await authApi.delete(`/api/cart/item/${cartItemId}`);
       } catch (err) {
         handleError(err, "Failed to remove item.");
-        fetchCart(); // rollback on failure
+        fetchCart();
       }
     },
     [token, authApi, fetchCart]
@@ -229,10 +229,11 @@ export function CartWishlistProvider({ children }) {
             p.cartItemId === cartItemId ? { ...p, quantity } : p
           )
         );
-        await authApi.put(`/cart/item/${cartItemId}`, { quantity });
+        // ✅ FIX: Add /api prefix
+        await authApi.put(`/api/cart/item/${cartItemId}`, { quantity });
       } catch (err) {
         handleError(err, "Failed to update quantity.");
-        fetchCart(); // rollback on failure
+        fetchCart();
       }
     },
     [token, authApi, fetchCart]
@@ -241,7 +242,8 @@ export function CartWishlistProvider({ children }) {
   const clearCart = useCallback(async () => {
     if (token) {
       try {
-        await authApi.delete("/cart");
+        // ✅ FIX: Add /api prefix
+        await authApi.delete("/api/cart");
       } catch (err) {
         handleError(err, "Failed to clear cart.");
       }
@@ -254,7 +256,6 @@ export function CartWishlistProvider({ children }) {
  // ================== WISHLIST ==================
   const addToWishlist = useCallback(
     async (item) => {
-      // 🔍 DEBUG: If item is a string (ID) instead of object, warn the developer
       if (typeof item === "string") {
         console.error("ERROR: addToWishlist expects a full Product Object, but received a String ID:", item);
         console.warn(" Fix: Call addToWishlist(product) instead of addToWishlist(product._id)");
@@ -263,7 +264,6 @@ export function CartWishlistProvider({ children }) {
       
       const normalized = normalizeItem(item);
 
-      // 🛡️ SAFETY CHECK: Ensure we actually have a Product ID
       if (!normalized._id) {
         console.error(" ERROR: Item is missing '_id'. cannot add to wishlist.", item);
         return;
@@ -271,7 +271,6 @@ export function CartWishlistProvider({ children }) {
       
       const payloadId = normalized._id;
 
-      // 1. Optimistic UI Update (Immediate feedback for user)
       if (!token) {
         setWishlist((prev) =>
           prev.some((p) => p.id === normalized.id) ? prev : [...prev, normalized]
@@ -279,9 +278,9 @@ export function CartWishlistProvider({ children }) {
         return;
       }
 
-      // 2. Server Request
       try {
-        const { data } = await authApi.post(`/wishlist/${payloadId}`);
+        // ✅ FIX: Add /api prefix
+        const { data } = await authApi.post(`/api/wishlist/${payloadId}`);
         if (data?.products) {
           setWishlist(data.products.map(normalizeItem));
         }
@@ -300,10 +299,11 @@ export function CartWishlistProvider({ children }) {
       }
       try {
         setWishlist((prev) => prev.filter((p) => p._id !== productId));
-        await authApi.delete(`/wishlist/${productId}`);
+        // ✅ FIX: Add /api prefix
+        await authApi.delete(`/api/wishlist/${productId}`);
       } catch (err) {
         handleError(err, "Failed to remove from wishlist.");
-        fetchWishlist(); // rollback on failure
+        fetchWishlist();
       }
     },
     [token, authApi, fetchWishlist]
@@ -355,8 +355,8 @@ export function CartWishlistProvider({ children }) {
       wishlistCount,
       loading,
       error,
-      refreshCart: fetchCart, // ✅ exposed
-      refreshWishlist: fetchWishlist, // ✅ exposed
+      refreshCart: fetchCart,
+      refreshWishlist: fetchWishlist,
     }),
     [
       cart,

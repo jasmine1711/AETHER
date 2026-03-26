@@ -28,21 +28,22 @@ export default function Products() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    const categoryParam = searchParams.get("category") || "";
+    let isMounted = true; // ✅ Prevent state updates after unmount
     
     const fetchProducts = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Build URL with pagination to get all products
-        let url = "/api/products?limit=100"; // Get up to 100 products
+        const categoryParam = searchParams.get("category") || "";
+        let url = "/api/products?limit=100";
         if (categoryParam) {
           url = `/api/products?category=${encodeURIComponent(categoryParam)}&limit=100`;
         }
         
         const response = await api.get(url);
         
-        // Handle response structure correctly
+        if (!isMounted) return; // ✅ Don't update if component unmounted
+        
         let productsList = [];
         
         if (response.data && Array.isArray(response.data)) {
@@ -56,9 +57,8 @@ export default function Products() {
           productsList = [];
         }
         
-        console.log(`✅ Fetched ${productsList.length} products`); // Debug log
+        console.log(`✅ Fetched ${productsList.length} products for category: ${categoryParam || "all"}`);
         
-        // Ensure each product has required fields
         const productsWithFallback = productsList.map((p) => ({
           ...p,
           _id: p._id || p.id,
@@ -69,15 +69,21 @@ export default function Products() {
         
         setAllProducts(productsWithFallback);
       } catch (error) {
-        console.error("Error fetching products:", error);
-        setError(error.message || "Failed to load products");
-        setAllProducts([]);
+        if (isMounted) {
+          console.error("Error fetching products:", error);
+          setError(error.message || "Failed to load products");
+          setAllProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchProducts();
+    
+    return () => {
+      isMounted = false; // ✅ Cleanup
+    };
   }, [searchParams]);
 
   if (loading) {

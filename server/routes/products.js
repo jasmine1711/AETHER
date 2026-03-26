@@ -60,7 +60,7 @@ router.get("/test/hello", (req, res) => {
 // GET all products with optional category, exclude, pagination
 router.get("/", async (req, res) => {
   try {
-    const { category, exclude, page = 1, limit = 12 } = req.query;
+    const { category, exclude, page = 1, limit = 100 } = req.query; 
     let filter = {};
 
     if (category) {
