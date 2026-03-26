@@ -74,7 +74,8 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: "AUTH_START" });
 
-      const { data } = await api.post("/auth/register", {
+      // ✅ FIX: Add /api prefix
+      const { data } = await api.post("/api/auth/register", {
         name,
         username,
         email: email.toLowerCase(),
@@ -111,7 +112,8 @@ export const AuthProvider = ({ children }) => {
         password: credentials.password,
       };
 
-      const { data } = await api.post("/auth/login", payload);
+      // ✅ FIX: Add /api prefix
+      const { data } = await api.post("/api/auth/login", payload);
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
@@ -133,7 +135,8 @@ export const AuthProvider = ({ children }) => {
   // ================= LOGOUT =================
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
+      // ✅ FIX: Add /api prefix
+      await api.post("/api/auth/logout");
     } catch {
       // ignore API logout failure
     } finally {
