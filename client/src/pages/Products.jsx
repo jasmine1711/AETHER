@@ -24,6 +24,7 @@ function AnimatedProductCard({ product }) {
 export default function Products() {
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -31,15 +32,17 @@ export default function Products() {
     
     const fetchProducts = async () => {
       setLoading(true);
+      setError(null);
       try {
-        // ✅ Use api instance with correct endpoint (no double /api)
-        const url = categoryParam 
-          ? `/api/products?category=${encodeURIComponent(categoryParam)}`
-          : "/api/products";
+        // Build URL with pagination to get all products
+        let url = "/api/products?limit=100"; // Get up to 100 products
+        if (categoryParam) {
+          url = `/api/products?category=${encodeURIComponent(categoryParam)}&limit=100`;
+        }
         
         const response = await api.get(url);
         
-        // ✅ Handle response structure
+        // Handle response structure correctly
         let productsList = [];
         
         if (response.data && Array.isArray(response.data)) {
@@ -53,6 +56,8 @@ export default function Products() {
           productsList = [];
         }
         
+        console.log(`✅ Fetched ${productsList.length} products`); // Debug log
+        
         // Ensure each product has required fields
         const productsWithFallback = productsList.map((p) => ({
           ...p,
@@ -65,6 +70,7 @@ export default function Products() {
         setAllProducts(productsWithFallback);
       } catch (error) {
         console.error("Error fetching products:", error);
+        setError(error.message || "Failed to load products");
         setAllProducts([]);
       } finally {
         setLoading(false);
@@ -79,6 +85,17 @@ export default function Products() {
       <div className="products-loading">
         <div className="spinner"></div>
         <p>Loading products...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="products-loading">
+        <p style={{ color: "red" }}>Error: {error}</p>
+        <button onClick={() => window.location.reload()} className="btn-primary">
+          Try Again
+        </button>
       </div>
     );
   }

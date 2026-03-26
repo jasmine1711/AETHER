@@ -92,12 +92,33 @@ app.use("/api/reviews", reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use("/api/ai", aiRoutes);
 
-// ===== Health Check Endpoint (for Render) =====
+// ===== Health Check Endpoint =====
 app.get("/health", (req, res) => {
   res.status(200).json({ 
     status: "OK", 
     timestamp: new Date().toISOString(),
     mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected"
+  });
+});
+
+// ===== API Info Route (instead of serving React) =====
+app.get("/", (req, res) => {
+  res.json({
+    name: "AETHER Backend API",
+    version: "1.0.0",
+    status: "running",
+    environment: process.env.NODE_ENV || "development",
+    endpoints: {
+      products: "/api/products",
+      productBySlug: "/api/products/slug/:slug",
+      auth: "/api/auth",
+      cart: "/api/cart",
+      wishlist: "/api/wishlist",
+      ai: "/api/ai/chat",
+      payments: "/api/payments",
+      health: "/health"
+    },
+    documentation: "Frontend is deployed at: https://velvety-basbousa-666b8c.netlify.app"
   });
 });
 
@@ -118,23 +139,7 @@ if (fs.existsSync(imagesPath)) {
   });
 }
 
-// ===== Serve React App in Production =====
-if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "..", "client", "build");
-  
-  // ✅ FIXED: Use fs.existsSync instead of require('fs').existsSync
-  if (fs.existsSync(buildPath)) {
-    app.use(express.static(buildPath));
-    console.log(`✅ Serving React app from: ${buildPath}`);
-    
-    // Fallback for React Router
-    app.get("/*", (req, res) => {
-      res.sendFile(path.join(buildPath, "index.html"));
-    });
-  } else {
-    console.warn(`⚠️ Build folder not found at: ${buildPath}`);
-  }
-}
+// ===== REMOVED: React app serving - Backend should only serve API =====
 
 // ===== 404 Handler (only for API routes) =====
 app.use((req, res, next) => {
@@ -166,6 +171,8 @@ const HOST = process.env.HOST || "0.0.0.0";
 app.listen(PORT, HOST, () => {
   console.log(`\n🚀 Server running on http://${HOST}:${PORT}`);
   console.log(`📡 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`📡 API URL: https://aether-backend-7uwv.onrender.com`);
+  console.log(`📡 Frontend URL: https://velvety-basbousa-666b8c.netlify.app`);
   
   // Razorpay Status
   if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
